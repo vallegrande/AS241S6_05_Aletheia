@@ -4,6 +4,9 @@ import evidencesRouter from './routes/evidences.js'
 import verifyRouter from './routes/verify.js'
 import { query } from './db.js'
 
+// Migración ligera para volúmenes ya existentes (init SQL solo corre en BD nueva).
+await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS foto TEXT NOT NULL DEFAULT \'\'').catch(() => {})
+
 const app = express()
 app.use(express.json({ limit: '1mb' }))
 

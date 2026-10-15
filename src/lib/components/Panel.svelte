@@ -20,6 +20,7 @@
   import ProfileForm from './panel/ProfileForm.svelte'
   import EvidencesSection from './panel/EvidencesSection.svelte'
   import CertificatesSection from './panel/CertificatesSection.svelte'
+  import OverviewSection from './panel/OverviewSection.svelte'
   import Icon from './Icon.svelte'
   import { OPEN_WALLET_MODAL } from '../stores/panelBus'
   import { onMount } from 'svelte'
@@ -30,17 +31,23 @@
   const walletOn = $derived($wallet.connected)
 
   const NAV = [
+    { id: 'resumen', label: 'Resumen', icon: 'sparkle' },
     { id: 'perfil', label: 'Perfil', icon: 'user' },
     { id: 'evidencias', label: 'Evidencias', icon: 'book' },
     { id: 'certificados', label: 'Certificados', icon: 'award' },
   ]
 
-  let activeTab = $state('perfil')
+  let activeTab = $state('resumen')
   let sideOpen = $state(false)
   let netOpen = $state(false)
   let walletOpen = $state(false)
 
   const MODULES = {
+    resumen: {
+      title: 'Resumen',
+      sub: 'Tu reputación en un vistazo: evidencias, huellas y certificados.',
+      icon: 'sparkle',
+    },
     perfil: {
       title: 'Perfil',
       sub: 'Tu identidad profesional: nombre, enlaces y bio revisables por ti.',
@@ -57,7 +64,7 @@
       icon: 'award',
     },
   }
-  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.perfil)
+  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.resumen)
 
   const activeIdx = $derived(NAV.findIndex((t) => t.id === activeTab))
   let collapsed = $state(typeof localStorage !== 'undefined' && localStorage.getItem('sb-collapsed') === '1')
@@ -252,6 +259,12 @@
     </header>
 
     <main>
+      <div role="tabpanel" id="panel-resumen" aria-label="Resumen" hidden={activeTab !== 'resumen'}>
+        <AuthGate>
+          <OverviewSection onNavigate={select} />
+        </AuthGate>
+      </div>
+
       <div role="tabpanel" id="panel-perfil" aria-label="Perfil" hidden={activeTab !== 'perfil'}>
         <AuthGate>
           <ProfileForm />

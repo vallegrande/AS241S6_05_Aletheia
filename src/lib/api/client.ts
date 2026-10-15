@@ -8,6 +8,7 @@ export type Profile = {
   nombre: string
   titulo: string
   bio: string
+  foto: string
   links: Record<string, string>
   updated_at?: string
 }
@@ -73,7 +74,7 @@ export async function getProfile(): Promise<Profile> {
   return handle<Profile>(res)
 }
 
-export async function saveProfile(p: Pick<Profile, 'nombre' | 'titulo' | 'bio' | 'links'>): Promise<Profile> {
+export async function saveProfile(p: Pick<Profile, 'nombre' | 'titulo' | 'bio' | 'foto' | 'links'>): Promise<Profile> {
   const res = await fetch(`${BASE}/profile`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },

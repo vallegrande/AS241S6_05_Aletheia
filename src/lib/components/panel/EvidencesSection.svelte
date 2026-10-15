@@ -15,6 +15,7 @@
   import FormField from '../dapp/FormField.svelte'
   import StatusMessage from '../dapp/StatusMessage.svelte'
   import Icon from '../Icon.svelte'
+  import { fly } from 'svelte/transition'
 
   const TIPOS = [
     { id: 'proyecto', label: 'Proyecto' },
@@ -202,15 +203,19 @@
   {/if}
 
   {#if loading}
-    <StatusMessage tone="muted" spin message="Cargando evidencias…" />
+    <ul class="ev-list" aria-hidden="true">
+      {#each [0, 1, 2] as i (i)}
+        <li class="ev-item ev-skel"><span class="ev-skel-bar"></span><span class="ev-skel-bar short"></span></li>
+      {/each}
+    </ul>
   {:else if error && !formOpen}
     <StatusMessage tone="error" message={error} />
   {:else if items.length === 0 && !formOpen}
     <StatusMessage tone="muted" message="Aún no tienes evidencias. Crea la primera para empezar a construir tu reputación." />
   {:else}
     <ul class="ev-list">
-      {#each items as ev (ev.id)}
-        <li class="ev-item">
+      {#each items as ev, i (ev.id)}
+        <li class="ev-item" in:fly={{ y: 10, duration: 240, delay: Math.min(i * 40, 200) }}>
           <div class="ev-item-main">
             <div class="ev-item-head">
               <span class="dapp-chip info">{tipoLabel(ev.tipo)}</span>
@@ -378,6 +383,36 @@
   .ev-del {
     color: #fca5a5;
     border-color: rgba(248, 113, 113, 0.3);
+  }
+
+  .ev-skel {
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .ev-skel-bar {
+    display: block;
+    height: 12px;
+    width: 42%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(196, 181, 253, 0.06) 25%, rgba(196, 181, 253, 0.12) 50%, rgba(196, 181, 253, 0.06) 75%);
+    background-size: 200% 100%;
+    animation: ev-shimmer 1.3s ease-in-out infinite;
+  }
+
+  .ev-skel-bar.short {
+    width: 70%;
+    height: 10px;
+  }
+
+  @keyframes ev-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ev-skel-bar { animation: none; }
   }
 
   textarea {

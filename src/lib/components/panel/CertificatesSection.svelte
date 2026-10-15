@@ -19,6 +19,7 @@
   import { pushToast } from '../../stores/toast'
   import StatusMessage from '../dapp/StatusMessage.svelte'
   import Icon from '../Icon.svelte'
+  import { fly } from 'svelte/transition'
 
   let items = $state([])
   let loading = $state(true)
@@ -131,8 +132,8 @@
     <StatusMessage tone="muted" message="Primero crea evidencias en el módulo Evidencias; desde ahí podrás certificarlas aquí." />
   {:else}
     <ul class="ct-list">
-      {#each items as ev (ev.id)}
-        <li class="ct-item">
+      {#each items as ev, i (ev.id)}
+        <li class="ct-item" in:fly={{ y: 10, duration: 240, delay: Math.min(i * 40, 200) }}>
           <div class="ct-main">
             <div class="ct-head">
               <h3 class="ct-title">{ev.titulo}</h3>

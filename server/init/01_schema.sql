@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   nombre     TEXT NOT NULL DEFAULT '',
   titulo     TEXT NOT NULL DEFAULT '',
   bio        TEXT NOT NULL DEFAULT '',
+  foto       TEXT NOT NULL DEFAULT '',
   links      JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
