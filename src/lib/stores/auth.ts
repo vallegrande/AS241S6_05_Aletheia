@@ -251,6 +251,12 @@ export async function signOutGoogle() {
   }
 }
 
+/** Devuelve el ID token de Firebase actual (para la API de Aletheia) o null. */
+export async function getIdToken(): Promise<string | null> {
+  if (!firebaseAuth?.currentUser) return null
+  return firebaseAuth.currentUser.getIdToken()
+}
+
 /* ------------------------------------------------------------------ */
 /* Errores → notificación bonita (toast) en vez de texto rojo          */
 /* ------------------------------------------------------------------ */

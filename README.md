@@ -1,112 +1,98 @@
 # Aletheia
 
-**DApp educativa desarrollada en Svelte** que integra **Pali Wallet** mediante **Ethers.js** para interactuar con una red blockchain de prueba: conexión real de wallet, lectura de cuenta (address, balance, red, chain ID, testnet), transacciones cuenta a cuenta y verificación del transaction hash en el explorador correspondiente.
+**Plataforma de identidad profesional descentralizada** (Fase 1 MVP). Los profesionales construyen un perfil portable con evidencias (proyectos, certificaciones, logros), generan huellas criptográficas SHA-256 y pueden certificarlas on-chain en **Polygon Amoy**. Cualquiera puede verificar una huella desde `#/verificar` sin crear cuenta.
+
+---
+
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | Svelte 5 + Vite 7 |
+| Auth | Firebase Auth (solo Google) |
+| API | Node.js + Express (`server/`) |
+| Datos y archivos | PostgreSQL 16 en Docker (`bytea`, máx. 10 MB por archivo) |
+| Blockchain | Contrato `ProofRegistry.sol` (SHA-256 → bytes32) en Polygon Amoy |
 
 ---
 
 ## Ejecutar el proyecto
 
 ```bash
+# 1) Backend (Postgres + API) — requiere Docker
+docker compose up -d --build
+
+# 2) Frontend
 npm install
-npm run dev        # desarrollo → http://localhost:5173
+npm run dev        # → http://localhost:5173  (proxy /api → :3001)
 ```
 
 Otros comandos:
 
 ```bash
-npm run build      # build de producción (carpeta dist/)
-npm run preview    # sirve el build de producción
-npm run check      # svelte-check (tipos + plantillas): 0 errores
+npm run build      # build de producción (dist/)
+npm run preview    # sirve el build
+npm run check      # svelte-check: 0 errores
+docker compose down             # para la API y la BD
+docker compose down -v          # además borra los datos
 ```
 
-> Requiere un navegador con la extensión **Pali Wallet** instalada para la funcionalidad completa.
+### Variables de entorno (`.env` en la raíz)
+
+```
+VITE_FIREBASE_API_KEY=…
+VITE_FIREBASE_AUTH_DOMAIN=…
+VITE_FIREBASE_PROJECT_ID=…
+VITE_FIREBASE_STORAGE_BUCKET=…
+VITE_FIREBASE_MESSAGING_SENDER_ID=…
+VITE_FIREBASE_APP_ID=…
+# Contrato desplegado en Amoy (ver docs/REMIX.md); vacío = certificación on-chain deshabilitada
+VITE_PROOF_REGISTRY_ADDRESS=
+```
+
+El `.env` **nunca** se sube al repositorio (`.gitignore`).
 
 ---
 
-## Funcionalidad (todo real, nada simulado)
+## Flujo del producto (Fase 1)
 
-| Requisito | Implementación |
-|---|---|
-| Iniciar sesión / conectar Pali Wallet | Descubrimiento **EIP-6963** (Pali primero) + fallback `window.ethereum` → `eth_requestAccounts` |
-| Desconectar | `wallet_revokePermissions` (docs oficiales Pali) |
-| Detectar cambios de cuenta | Evento `accountsChanged` del provider |
-| Leer el address | `eth_accounts` + checksum EIP-55 con `ethers.getAddress` |
-| Leer el saldo | `eth_getBalance` vía `BrowserProvider.getBalance` (Ethers.js) |
-| Verificar el ID de la testnet | `eth_chainId` + `provider.getNetwork()` (nombre real de la red) |
-| Realizar transacciones cuenta a cuenta | `signer.sendUncheckedTransaction` con validación previa de address (`ethers.isAddress`) y cantidad (`parseEther`) |
-| Capturar/mostrar el hash | El hash devuelto por la wallet se muestra en un panel con botón **Copiar Hash** |
-| Estado de la transacción | `waitForTransaction` (Pendiente → Confirmada / Rechazada) |
-| Enlace al explorador | Mapa de exploradores reales por **chainId** (Etherscan, PolygonScan, Syscoin/Tanenbaum, etc.) — nunca URLs inventadas |
+1. **Registro / login:** Google (Firebase Auth).
+2. **Perfil:** nombre, título, bio y enlaces (GitHub, LinkedIn, portafolio) → API → Postgres.
+3. **Evidencias:** CRUD con tipo (proyecto / certificación / logro / portafolio), tags, fecha, enlace y archivo opcional.
+4. **Certificados:** SHA-256 (WebCrypto) de la evidencia → huella guardada → *opcional* registro on-chain en Amoy con Pali Wallet.
+5. **Verificación pública:** `#/verificar` — pegar la huella y ver el estado del registro (sin sesión).
 
-### Errores manejados (mensajes exactos de la actividad)
-
-- `Pali Wallet no detectada.`
-- `Conecta tu wallet para continuar.`
-- `La dirección de destino no es válida.`
-- `Saldo insuficiente.`
-- `La transacción fue rechazada desde Pali Wallet.`
-- `Esperando confirmación…` / `Transacción confirmada.`
-
-Los errores técnicos completos quedan en consola (`[aletheia] …`) para debugging.
+**Privacidad:** los archivos y metadatos viven fuera de la cadena (Postgres); en blockchain solo va `bytes32` (la huella). Una huella certifica *integridad del registro*, no la veracidad del contenido original.
 
 ---
 
 ## Estructura
 
 ```
-src/
-├── App.svelte                    # Composición de secciones (flujo de la demo)
-├── main.js                       # mount de Svelte 5
-├── styles/base.css               # Sistema visual: negro + blanco + morado
-└── lib/
-    ├── web3/
-    │   ├── provider.ts           # Descubrimiento EIP-6963 (guía oficial Pali)
-    │   ├── wallet.ts             # Store central: conexión, datos, tx
-    │   ├── chains.ts             # Exploradores reales por chainId
-    │   └── web3-types.ts         # Tipos EIP-1193 / EIP-6963
-    ├── stores/
-    │   └── wallet.ts             # (núcleo web3 reexportado)
-    ├── actions/
-    │   └── reveal.ts             # Reveal-on-scroll
-    ├── gooey/
-    │   ├── GooButton.svelte      # Botón goo (liquid-gooey adaptado a Svelte)
-    │   └── GooSVG.svelte         # Filtro SVG blur+contraste real
-    └── components/
-        ├── Nav.svelte
-        ├── Hero.svelte
-        ├── ProjectSection.svelte      # Descripción / Objetivos / Beneficios / Características
-        ├── DeveloperSection.svelte    # Carlos Alejandro Caycho Casas
-        ├── GallerySection.svelte
-        ├── ImageGalleryVertical.svelte
-        ├── WalletSection.svelte       # Actividad 2: conectar + datos de red
-        ├── TransactionSection.svelte  # Transacción + hash + explorador
-        └── Footer.svelte
+├── docker-compose.yml          # postgres:16 + api
+├── contracts/ProofRegistry.sol # registro mínimo de huellas (Remix)
+├── docs/REMIX.md               # guía de despliegue en Amoy
+├── server/                     # API Express (auth token Firebase + CRUD)
+│   ├── init/01_schema.sql
+│   └── src/{index,auth,db}.js + routes/
+└── src/
+    ├── App.svelte              # rutas: landing / #/panel / #/verificar
+    └── lib/
+        ├── api/client.ts       # cliente HTTP con ID token
+        ├── crypto/hash.ts      # SHA-256 (WebCrypto)
+        ├── components/panel/   # Perfil · Evidencias · Certificados
+        ├── components/VerifyPage.svelte
+        ├── stores/             # auth, wallet, network, toast
+        └── web3/               # provider, redes, proof-registry
 ```
-
-## Librerías visuales (adaptadas a Svelte)
-
-El proyecto permanece **100% Svelte**. Las tres librerías solicitadas están orientadas a React, así que se **reproduce fielmente su comportamiento visual** en Svelte (sin dependencias incompatibles):
-
-- **beUI Pro — Image Galleries** (`pro.beui.dev`): primera variante recomendada, *Vertical image gallery* — pared editorial de columnas con movimiento vertical continuo alternado, pausa en hover y máscara de desvanecido. → `ImageGalleryVertical.svelte`
-- **FeralUI — Gradients** (`feralui.dev`): iluminación ambiental monocroma púrpura sobre negro (radiales + grano anti-banding), como recurso secundario. → `Hero`, `WalletSection`, `DeveloperSection`
-- **Libraries.dev — Gooey** (`npm i liquid-gooey` es React 18+): núcleo del efecto (filtro SVG blur + contraste que funde nodos manteniendo el texto nítido) recreado como `GooButton` con física spring propia. Usado solo en CTA de conexión y envío de transacción.
-
-Detalle completo en [`docs/INTEGRATIONS.md`](docs/INTEGRATIONS.md).
 
 ---
 
 ## Identidad visual
 
-**Negro + blanco + morado.** El negro domina (fondos, navegación, superficies), blanco para títulos e información principal, grises para metadata, y el morado reservado para acciones, indicadores y la luz ambiental blockchain. Sin paletas multicolor, sin glassmorphism exagerado, sin neon.
-
-## Configuración
-
-- `vite.config.js` — `publicDir: 'static'` (logo, fotografía del desarrollador, videos del hero y assets del hero: `wallapaper.jpeg` + su recorte con alfa `hero-robot.webp`).
-- `jsconfig.json` — Svelte 5 + comprobación estricta.
-- Tipografía: Space Grotesk (display) / Inter (texto) / JetBrains Mono (datos on-chain).
+**Negro + blanco + morado.** Landing cinematográfica con scroll (GSAP) y panel “Nocturne Glass”. Tipografía Geist Sans/Mono autoalojada.
 
 ## Autor
 
 **Carlos Alejandro Caycho Casas**
-Estudiante de Análisis de Sistemas y desarrollador Full-Stack en formación.
-Valle Grande — Carrera Profesional de Análisis de Sistemas · Cañete, Lima, Perú
+Estudiante de Análisis de Sistemas · Valle Grande — Cañete, Lima, Perú

@@ -1,18 +1,10 @@
 <script>
   /**
-   * Panel — dashboard de Aletheia (vive en #/panel, separada de la landing).
+   * Panel — dashboard de identidad de Aletheia (vive en #/panel).
    *
-   * Layout: header fijo a todo el ancho del contenido (saludo + cuenta del
-   * usuario) + rail de 260px colapsable que llega hasta arriba (píldora
-   * deslizante + aurora morada) + main.
-   *
-   * Módulos: Transacción y Consultas (tabs internas: individual | masiva)
-   * viven en el main. Red → tuerca del rail (modal). Wallet → kebab de la
-   * tarjeta del rail (modal con AuthGate). El navbar flotante de la landing
-   * NO se renderiza aquí (App.svelte). En móvil el rail es un drawer.
-   *
-   * Sin sesión → wallet y transacción muestran su puerta de login (AuthGate);
-   * red y saldos son públicos. El orden es SIEMPRE Google → wallet.
+   * Layout: header fijo + rail colapsable 260px + main.
+   * Módulos: Perfil, Evidencias y Certificados (API Express + Postgres).
+   * La wallet (Pali) solo se necesita para certificar on-chain en Amoy.
    */
   import '../../styles/dapp.css'
   import '../../styles/sidebar.css'
@@ -22,53 +14,54 @@
   import { getNetwork } from '../web3/networks'
   import AuthGate from './AuthGate.svelte'
   import WalletSection from './WalletSection.svelte'
-  import TransactionSection from './TransactionSection.svelte'
   import NetworkSwitcher from './NetworkSwitcher.svelte'
-  import QueriesSection from './QueriesSection.svelte'
   import PanelAccount from './PanelAccount.svelte'
   import PanelModal from './PanelModal.svelte'
-  import TransactionModal from './TransactionModal.svelte'
+  import ProfileForm from './panel/ProfileForm.svelte'
+  import EvidencesSection from './panel/EvidencesSection.svelte'
+  import CertificatesSection from './panel/CertificatesSection.svelte'
   import Icon from './Icon.svelte'
   import { OPEN_WALLET_MODAL } from '../stores/panelBus'
   import { onMount } from 'svelte'
 
   const user = $derived($auth.user)
 
-  // Tira de contexto: solo lectura del estado real (no cambia lógica).
   const activeNet = $derived(getNetwork($network.activeId))
   const walletOn = $derived($wallet.connected)
 
-  /* Módulos del panel: transacción y consultas viven en el main.
-     Red → tuerca del sidebar (modal). Wallet → kebab de la tarjeta
-     del sidebar (modal). Saldo individual + masiva → tabs de Consultas. */
   const NAV = [
-    { id: 'tx', label: 'Transacciones', icon: 'zap' },
-    { id: 'consultas', label: 'Consultas', icon: 'search' },
+    { id: 'perfil', label: 'Perfil', icon: 'user' },
+    { id: 'evidencias', label: 'Evidencias', icon: 'book' },
+    { id: 'certificados', label: 'Certificados', icon: 'award' },
   ]
 
-  let activeTab = $state('tx')
+  let activeTab = $state('perfil')
   let sideOpen = $state(false)
   let netOpen = $state(false)
   let walletOpen = $state(false)
-  let txModalOpen = $state(false)
 
-  /* Header DINÁMICO: título/subtítulo del módulo activo (vive en el header,
-     nunca dentro del contenido de la sección). */
   const MODULES = {
-    tx: { title: 'Transacciones', sub: 'La DApp nunca firma: la aprobación ocurre en Pali Wallet.', icon: 'zap' },
-    consultas: { title: 'Consultas', sub: 'Lee saldos on-chain de cualquier cuenta, individual o en lote.', icon: 'search' },
+    perfil: {
+      title: 'Perfil',
+      sub: 'Tu identidad profesional: nombre, enlaces y bio revisables por ti.',
+      icon: 'user',
+    },
+    evidencias: {
+      title: 'Evidencias',
+      sub: 'Proyectos, certificaciones y logros con archivo o enlace.',
+      icon: 'book',
+    },
+    certificados: {
+      title: 'Certificados',
+      sub: 'Huella SHA-256 y registro on-chain en Polygon Amoy.',
+      icon: 'award',
+    },
   }
-  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.tx)
+  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.perfil)
 
-  // Sidebar: posición del item activo (alimenta la píldora CSS) y estado
-  // de colapso del rail (solo iconos), persistido entre visitas.
   const activeIdx = $derived(NAV.findIndex((t) => t.id === activeTab))
   let collapsed = $state(typeof localStorage !== 'undefined' && localStorage.getItem('sb-collapsed') === '1')
 
-  /* Coleta de expansión: despierta con hover (cabecera/logo o la propia
-     coleta) y se OCULTA con gracia (600ms). Manejado en JS porque
-     pointer-events no es animable: la gracia de CSS dejaba clicks caídos
-     en el trayecto logo→coleta (pointer-events vuelve instantáneo). */
   let tailAwake = $state(false)
   let tailTimer = null
 
@@ -88,7 +81,6 @@
     }, 600)
   }
 
-  /* al expandir por la coleta, se duerme de inmediato (ya no existe) */
   function toggleCollapse() {
     collapsed = !collapsed
     tailAwake = false
@@ -123,10 +115,7 @@
   }
 
   onMount(() => {
-    // Sincroniza la red activa con la wallet (incluye chainChanged externo).
     initNetworkSync()
-    // Módulos hermanos (p. ej. Transacción sin wallet conectada) piden abrir
-    // el modal de conexión: el listener muere con el componente.
     const openWallet = () => (walletOpen = true)
     window.addEventListener(OPEN_WALLET_MODAL, openWallet)
     return () => window.removeEventListener(OPEN_WALLET_MODAL, openWallet)
@@ -263,14 +252,22 @@
     </header>
 
     <main>
-      <div role="tabpanel" id="panel-tx" aria-label="Transacciones" hidden={activeTab !== 'tx'}>
+      <div role="tabpanel" id="panel-perfil" aria-label="Perfil" hidden={activeTab !== 'perfil'}>
         <AuthGate>
-          <TransactionSection onNew={() => (txModalOpen = true)} />
+          <ProfileForm />
         </AuthGate>
       </div>
 
-      <div role="tabpanel" id="panel-consultas" aria-label="Consultas" hidden={activeTab !== 'consultas'}>
-        <QueriesSection />
+      <div role="tabpanel" id="panel-evidencias" aria-label="Evidencias" hidden={activeTab !== 'evidencias'}>
+        <AuthGate>
+          <EvidencesSection />
+        </AuthGate>
+      </div>
+
+      <div role="tabpanel" id="panel-certificados" aria-label="Certificados" hidden={activeTab !== 'certificados'}>
+        <AuthGate>
+          <CertificatesSection />
+        </AuthGate>
       </div>
     </main>
   </div>
@@ -285,14 +282,6 @@
     <PanelModal title="Detalle de wallet" width={640} onClose={() => (walletOpen = false)}>
       <AuthGate>
         <WalletSection />
-      </AuthGate>
-    </PanelModal>
-  {/if}
-
-  {#if txModalOpen}
-    <PanelModal title="Nueva transacción" width={560} onClose={() => (txModalOpen = false)}>
-      <AuthGate>
-        <TransactionModal onClose={() => (txModalOpen = false)} />
       </AuthGate>
     </PanelModal>
   {/if}

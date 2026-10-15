@@ -28,6 +28,7 @@
   import ToastStack from './lib/components/ToastStack.svelte'
   import ScrollScene from './lib/components/ScrollScene.svelte'
   import Panel from './lib/components/Panel.svelte'
+  import VerifyPage from './lib/components/VerifyPage.svelte'
   import { initSceneStack } from './lib/scroll/stack'
   import { initCovers } from './lib/scroll/cover'
   import { initAuth, auth } from './lib/stores/auth'
@@ -38,6 +39,7 @@
   // Ruta de app (vive en #/panel) vs landing cinematográfica. Solo conmuta
   // qué se renderiza; el diseño de la landing queda intacto.
   let isPanel = $derived(route === '#/panel')
+  let isVerify = $derived(route === '#/verificar')
 
   onMount(() => {
     // Firebase: restaura la sesión de Google previa si existe.
@@ -75,7 +77,7 @@
   // Stack de escenas solo en landing: al entrar a #/panel se desmonta
   // (teardown) y al volver se re-inicializa.
   $effect(() => {
-    if (isPanel || !stackEl) return
+    if (isPanel || isVerify || !stackEl) return
     const teardown = initSceneStack(stackEl)
     // Física de muelle para TODAS las láminas entrantes (hero→01, 01→02, …).
     const teardownCover = initCovers()
@@ -147,15 +149,17 @@
 </script>
 
 <GlobalBackground />
-{#if !isPanel}
+{#if !isPanel && !isVerify}
   <NavExpand />
 {/if}
-{#if !isPanel}
+{#if !isPanel && !isVerify}
   <Scrollbar />
 {/if}
 
 {#if isPanel}
   <Panel />
+{:else if isVerify}
+  <VerifyPage />
 {:else}
   <main bind:this={stackEl}>
   <!-- 00 · Aparición: el único escenario sin suelo propio (muestra el mesh) -->

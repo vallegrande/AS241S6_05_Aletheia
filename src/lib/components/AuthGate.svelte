@@ -37,8 +37,8 @@
 
       <h3>Acceso para miembros</h3>
       <p class="muted">
-        Inicia sesión con Google para desbloquear la conexión de Pali Wallet,
-        el balance on-chain y las transacciones de prueba.
+        Inicia sesión con Google para gestionar tu perfil profesional,
+        tus evidencias y sus certificados verificables.
       </p>
 
       <button

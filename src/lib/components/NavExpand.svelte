@@ -35,6 +35,7 @@
     { id: 'beneficios', label: 'Beneficios', href: '#beneficios' },
     { id: 'caracteristicas', label: 'Características', href: '#caracteristicas' },
     { id: 'desarrollador', label: 'Desarrollador', href: '#desarrollador' },
+    { id: 'verificar', label: 'Verificar', href: '#/verificar' },
   ]
 
   const user = $derived($auth.user)
