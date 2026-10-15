@@ -60,65 +60,74 @@
     align-items: center;
     justify-content: center;
     padding: 24px 16px;
-    background: rgba(5, 3, 16, 0.62);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 
   .pm {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    border: none;
-    border-radius: 14px;
-    /* UN solo color: superficie sólida, sin vidrio ni capas */
-    background: #0f0b16;
-    box-shadow: 0 12px 40px rgba(3, 0, 12, 0.45);
+    gap: 14px;
+    padding: 20px 22px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background: #141418;
+    box-shadow:
+      0 24px 64px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     max-height: calc(100dvh - 48px);
     overflow-y: auto;
     outline: none;
   }
 
   .pm-head {
+    position: sticky;
+    top: -20px;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding-bottom: 8px;
+    margin: -4px -4px 0;
+    padding: 4px 4px 12px;
+    background: #141418;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .pm-title {
     margin: 0;
     font-family: var(--font-display, 'Geist Sans', system-ui, sans-serif);
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 650;
-    letter-spacing: -0.01em;
-    color: var(--white, #fff);
+    letter-spacing: -0.015em;
+    color: #fff;
   }
 
   .pm-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     flex: none;
-    border: none;
-    border-radius: 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
     background: none;
-    color: var(--gray-400, #9c96b0);
+    color: #8a8a96;
     cursor: pointer;
     transition:
       color 0.15s ease,
       background 0.15s ease,
+      border-color 0.15s ease,
       transform 0.15s ease;
   }
 
   .pm-close:hover {
-    color: var(--purple-300, #c4b5fd);
-    background: rgba(139, 92, 246, 0.12);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .pm-close:active {
@@ -126,7 +135,7 @@
   }
 
   .pm-close:focus-visible {
-    outline: 2px solid var(--purple-400, #a78bfa);
+    outline: 2px solid #e8e8ec;
     outline-offset: 2px;
   }
 

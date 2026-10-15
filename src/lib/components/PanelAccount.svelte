@@ -9,8 +9,10 @@
    */
   import { auth, signOutGoogle } from '../stores/auth'
   import { wallet, disconnectWallet } from '../stores/wallet'
+  import { requestOpenProfileModal } from '../stores/panelBus'
   import GoogleMark from './GoogleMark.svelte'
   import LoginModal from './LoginModal.svelte'
+  import Icon from './Icon.svelte'
   import { fly } from 'svelte/transition'
 
   const user = $derived($auth.user)
@@ -30,6 +32,11 @@
     await disconnectWallet().catch(() => {})
     await signOutGoogle().catch(() => {})
     menuOpen = false
+  }
+
+  function handleProfile() {
+    menuOpen = false
+    requestOpenProfileModal()
   }
 
   function onWindowKey(e) {
@@ -88,7 +95,12 @@
             <p class="acct-user-mail">{user.email}</p>
           </div>
         </div>
-        <button type="button" class="acct-signout" role="menuitem" onclick={handleSignOut}>
+        <button type="button" class="acct-item" role="menuitem" onclick={handleProfile}>
+          <span class="acct-item-ic" aria-hidden="true"><Icon name="user" size={14} /></span>
+          Perfil
+        </button>
+        <button type="button" class="acct-item danger" role="menuitem" onclick={handleSignOut}>
+          <span class="acct-item-ic" aria-hidden="true"><Icon name="arrow" size={14} /></span>
           Cerrar sesión
         </button>
       </div>
@@ -289,9 +301,13 @@
     text-overflow: ellipsis;
   }
 
-  .acct-signout {
+  .acct-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
     min-height: 34px;
+    padding: 0 10px;
     border: 1px solid rgba(196, 181, 253, 0.18);
     border-radius: 8px;
     background: none;
@@ -306,13 +322,34 @@
       background 0.2s ease;
   }
 
-  .acct-signout:hover {
+  .acct-item-ic {
+    display: grid;
+    place-items: center;
+    color: var(--gray-400, #9c96b0);
+    flex: none;
+  }
+
+  .acct-item:hover {
+    border-color: rgba(167, 139, 250, 0.45);
+    color: var(--white, #fff);
+    background: rgba(124, 58, 237, 0.1);
+  }
+
+  .acct-item:hover .acct-item-ic {
+    color: var(--purple-300, #c4b5fd);
+  }
+
+  .acct-item.danger:hover {
     border-color: rgba(253, 164, 175, 0.45);
     color: var(--err, #fda4af);
     background: rgba(253, 164, 175, 0.06);
   }
 
-  .acct-signout:focus-visible {
+  .acct-item.danger:hover .acct-item-ic {
+    color: var(--err, #fda4af);
+  }
+
+  .acct-item:focus-visible {
     outline: 2px solid var(--purple-400, #a78bfa);
     outline-offset: 2px;
   }

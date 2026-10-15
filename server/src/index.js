@@ -5,7 +5,11 @@ import verifyRouter from './routes/verify.js'
 import { query } from './db.js'
 
 // Migración ligera para volúmenes ya existentes (init SQL solo corre en BD nueva).
-await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS foto TEXT NOT NULL DEFAULT \'\'').catch(() => {})
+await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS foto TEXT NOT NULL DEFAULT ''").catch(() => {})
+await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS foto_data BYTEA').catch(() => {})
+await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS foto_mime TEXT').catch(() => {})
+// Las URLs de Google guardadas antes ya no se usan: la foto se sube al backend.
+await query("UPDATE users SET foto = '' WHERE foto LIKE 'http%'").catch(() => {})
 
 const app = express()
 app.use(express.json({ limit: '1mb' }))

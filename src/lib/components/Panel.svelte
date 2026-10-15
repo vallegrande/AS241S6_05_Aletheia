@@ -3,7 +3,8 @@
    * Panel — dashboard de identidad de Aletheia (vive en #/panel).
    *
    * Layout: header fijo + rail colapsable 260px + main.
-   * Módulos: Perfil, Evidencias y Certificados (API Express + Postgres).
+   * Módulos: Resumen, Evidencias y Certificados (API Express + Postgres).
+   * El perfil se edita en un modal abierto desde el menú de cuenta.
    * La wallet (Pali) solo se necesita para certificar on-chain en Amoy.
    */
   import '../../styles/dapp.css'
@@ -22,7 +23,7 @@
   import CertificatesSection from './panel/CertificatesSection.svelte'
   import OverviewSection from './panel/OverviewSection.svelte'
   import Icon from './Icon.svelte'
-  import { OPEN_WALLET_MODAL } from '../stores/panelBus'
+  import { OPEN_WALLET_MODAL, OPEN_PROFILE_MODAL } from '../stores/panelBus'
   import { onMount } from 'svelte'
 
   const user = $derived($auth.user)
@@ -32,7 +33,6 @@
 
   const NAV = [
     { id: 'resumen', label: 'Resumen', icon: 'sparkle' },
-    { id: 'perfil', label: 'Perfil', icon: 'user' },
     { id: 'evidencias', label: 'Evidencias', icon: 'book' },
     { id: 'certificados', label: 'Certificados', icon: 'award' },
   ]
@@ -41,17 +41,13 @@
   let sideOpen = $state(false)
   let netOpen = $state(false)
   let walletOpen = $state(false)
+  let profileOpen = $state(false)
 
   const MODULES = {
     resumen: {
       title: 'Resumen',
       sub: 'Tu reputación en un vistazo: evidencias, huellas y certificados.',
       icon: 'sparkle',
-    },
-    perfil: {
-      title: 'Perfil',
-      sub: 'Tu identidad profesional: nombre, enlaces y bio revisables por ti.',
-      icon: 'user',
     },
     evidencias: {
       title: 'Evidencias',
@@ -124,8 +120,13 @@
   onMount(() => {
     initNetworkSync()
     const openWallet = () => (walletOpen = true)
+    const openProfile = () => (profileOpen = true)
     window.addEventListener(OPEN_WALLET_MODAL, openWallet)
-    return () => window.removeEventListener(OPEN_WALLET_MODAL, openWallet)
+    window.addEventListener(OPEN_PROFILE_MODAL, openProfile)
+    return () => {
+      window.removeEventListener(OPEN_WALLET_MODAL, openWallet)
+      window.removeEventListener(OPEN_PROFILE_MODAL, openProfile)
+    }
   })
 </script>
 
@@ -265,12 +266,6 @@
         </AuthGate>
       </div>
 
-      <div role="tabpanel" id="panel-perfil" aria-label="Perfil" hidden={activeTab !== 'perfil'}>
-        <AuthGate>
-          <ProfileForm />
-        </AuthGate>
-      </div>
-
       <div role="tabpanel" id="panel-evidencias" aria-label="Evidencias" hidden={activeTab !== 'evidencias'}>
         <AuthGate>
           <EvidencesSection />
@@ -295,6 +290,14 @@
     <PanelModal title="Detalle de wallet" width={640} onClose={() => (walletOpen = false)}>
       <AuthGate>
         <WalletSection />
+      </AuthGate>
+    </PanelModal>
+  {/if}
+
+  {#if profileOpen}
+    <PanelModal title="Tu perfil" width={640} onClose={() => (profileOpen = false)}>
+      <AuthGate>
+        <ProfileForm />
       </AuthGate>
     </PanelModal>
   {/if}

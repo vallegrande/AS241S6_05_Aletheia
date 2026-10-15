@@ -74,13 +74,28 @@ export async function getProfile(): Promise<Profile> {
   return handle<Profile>(res)
 }
 
-export async function saveProfile(p: Pick<Profile, 'nombre' | 'titulo' | 'bio' | 'foto' | 'links'>): Promise<Profile> {
+export async function saveProfile(p: Pick<Profile, 'nombre' | 'titulo' | 'bio' | 'links'>): Promise<Profile> {
   const res = await fetch(`${BASE}/profile`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
     body: JSON.stringify(p),
   })
   return handle<Profile>(res)
+}
+
+/** Sube la foto de perfil al backend (Postgres). Devuelve la ruta guardada. */
+export async function uploadProfilePhoto(file: File): Promise<{ foto: string }> {
+  const fd = new FormData()
+  fd.append('foto', file)
+  const res = await fetch(`${BASE}/profile/photo`, { method: 'POST', headers: await authHeaders(), body: fd })
+  return handle<{ foto: string }>(res)
+}
+
+/** Descarga la foto personalizada como object URL (requiere sesión). */
+export async function fetchProfilePhotoUrl(): Promise<string | null> {
+  const res = await fetch(`${BASE}/profile/photo`, { headers: await authHeaders() })
+  if (!res.ok) return null
+  return URL.createObjectURL(await res.blob())
 }
 
 /* ---------------- Evidencias ---------------- */

@@ -8,6 +8,7 @@
   import { listEvidences, getProfile } from '../../api/client'
   import { auth } from '../../stores/auth'
   import { PROOF_REGISTRY_ADDRESS } from '../../web3/proof-registry'
+  import { requestOpenProfileModal } from '../../stores/panelBus'
   import { fade } from 'svelte/transition'
   import Icon from '../Icon.svelte'
   import StatusMessage from '../dapp/StatusMessage.svelte'
@@ -51,6 +52,11 @@
     { id: 'evidencias', label: 'Añadir evidencia', icon: 'plus', hint: 'Proyecto, certificado o logro' },
     { id: 'certificados', label: 'Certificar', icon: 'award', hint: 'Huella SHA-256 y on-chain' },
   ]
+
+  function onAction(id) {
+    if (id === 'perfil') requestOpenProfileModal()
+    else onNavigate(id)
+  }
 </script>
 
 <section class="dapp-section ov" aria-label="Resumen">
@@ -80,7 +86,7 @@
           </h2>
           {#if !profileReady}
             <p class="ov-hint">Importamos tu nombre y foto de Google. Completa el resto para que tu identidad brille.</p>
-            <button type="button" class="btn btn-sm" onclick={() => onNavigate('perfil')}>Completar ahora</button>
+            <button type="button" class="btn btn-sm" onclick={() => requestOpenProfileModal()}>Completar ahora</button>
           {:else}
             <p class="ov-hint">
               {total === 0
@@ -148,7 +154,7 @@
       <!-- acciones -->
       <div class="ov-actions">
         {#each ACTIONS as a (a.id)}
-          <button type="button" class="ov-action" onclick={() => onNavigate(a.id)}>
+          <button type="button" class="ov-action" onclick={() => onAction(a.id)}>
             <span class="ov-action-ic" aria-hidden="true"><Icon name={a.icon} size={17} /></span>
             <span class="ov-action-text">
               <span class="ov-action-label">{a.label}</span>
