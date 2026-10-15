@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Artefactos de herramientas y tests temporales
+.freebuff
+*.err
+
 # Credenciales Firebase (nunca al repositorio)
 .env
 .env.*
