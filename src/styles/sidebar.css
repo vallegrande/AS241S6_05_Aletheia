@@ -1,0 +1,868 @@
+/**
+ * sidebar.css — Rail "Nocturne Glass" para el panel de Aletheia.
+ *
+ * IDENTIDAD DE LA LANDING: negro-violeta con mesh morado a la deriva,
+ * Geist Sans en todo el rail, luz púrpura como único acento.
+ *
+ *   · Rail de altura completa (260px): vidrio oscuro translúcido — el
+ *     mesh morado de GlobalBackground (que corre detrás del panel) se
+ *     cuela a través. Sin flotar: pegado al borde izquierdo.
+ *   · Píldora compartida que DESLIZA entre items con curva de muelle
+ *     — el mismo lenguaje de interacción del navbar de la landing.
+ *   · Colapsable: botón en el pie que pliega el rail a 76px (solo
+ *     iconos); el contenido principal sigue al rail (dapp.css).
+ *   · Aurora morada respirando en la base del rail (deriva lenta, GPU).
+ *
+ * SIN: números en la lista, mono mixto, amarillo, scanlines CRT.
+ * El bloque de tokens gobierna cada valor del componente.
+ */
+
+.dash-side {
+  /* ============ TOKENS ============ */
+
+  /* ---- TYPE (una sola familia: GEIST SANS, la de la landing) ---- */
+  --sb-font: 'Geist Sans', system-ui, sans-serif;
+  --sb-text-2xs: 0.625rem;
+  --sb-text-xs: 0.6875rem;
+  --sb-text-sm: 0.78125rem;
+  --sb-text-md: 0.84375rem;
+  --sb-text-lg: 0.9375rem;
+
+  /* ---- SPACE (base 2px → escala 2/4/8/12/16/20/24) ---- */
+  --sb-0: 2px;
+  --sb-1: 4px;
+  --sb-2: 8px;
+  --sb-3: 12px;
+  --sb-4: 16px;
+  --sb-5: 20px;
+  --sb-6: 24px;
+
+  /* ---- COLOR (ramp de la landing: negro-violeta / tinta / UN morado) ---- */
+  --sb-rail: rgba(8, 5, 20, 0.72);
+  --sb-ink: var(--gray-050, #ecebf1);
+  --sb-ink-2: var(--gray-400, #9c96b0);
+  --sb-ink-3: var(--gray-500, #726c86);
+  --sb-line: rgba(196, 181, 253, 0.12);
+  --sb-line-strong: rgba(196, 181, 253, 0.22);
+  --sb-accent: var(--purple-400, #a78bfa);
+  --sb-accent-2: var(--purple-300, #c4b5fd);
+  --sb-ok: var(--ok, #6ee7b7);
+
+  /* ---- FORM ---- */
+  --sb-radius-sm: 10px;
+  --sb-border: 1px solid var(--sb-line);
+
+  /* ---- GLOW (dos, y solo dos) ---- */
+  --sb-glow-accent: 0 0 22px rgba(124, 58, 237, 0.22);
+  --sb-glow-ok: 0 0 8px rgba(110, 231, 183, 0.55);
+
+  /* ---- MOTION (tres duraciones, dos curvas) ---- */
+  --sb-dur-fast: 140ms;
+  --sb-dur: 240ms;
+  --sb-dur-slow: 520ms;
+  --sb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --sb-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- GEOMETRÍA ---- */
+  --sb-item-h: 42px;
+  --sb-step: calc(var(--sb-item-h) + var(--sb-1)); /* alto de item + gap */
+  --sb-rail-collapsed: 76px;
+
+  /* ============ RAIL (altura completa: llega hasta arriba) ============ */
+  /* alto del header fijo del panel: la línea del header cruza el rail
+     exactamente a esa altura (misma var que dapp.css) */
+  --dapp-header-h: 72px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  z-index: 40;
+  font-family: var(--sb-font);
+  color: var(--sb-ink);
+  background: var(--sb-rail);
+  border: none;
+  border-right: var(--sb-border);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  /* SIN overflow:hidden en el rail: la aurora se recorta en SU capa
+     (.dash-aurora) y la coleta de expansión debe poder salir del filo */
+  transition: width var(--sb-dur-slow) var(--sb-ease);
+}
+
+/* capa de scroll: el contenido nunca arrastra a las auroras consigo */
+.dash-scroll {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-3);
+  padding: var(--sb-4) var(--sb-3) var(--sb-3);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* la línea del header del panel CRUZA el rail: la marca el borde inferior
+   de la franja superior (misma altura, mismo color que dapp.css). Vive en
+   el aside (no en .dash-scroll): por encima de la aurora, por debajo del
+   scroll, y SIN resplandor adicional — es la misma línea continua. */
+.dash-side::after {
+  content: '';
+  position: absolute;
+  top: var(--dapp-header-h);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(196, 181, 253, 0.12);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* todo el contenido vive por encima de la aurora */
+.dash-scroll > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- AURORA: dos manchas moradas que respiran en la base del rail.
+      Viven en una capa propia RECORTADA (overflow hidden):
+      la luz jamás escapa del rail ni empuja el scroll.
+      Los stops mueren ≤62% del radio: el color jamás toca un borde
+      (misma disciplina anti-arco del GlobalBackground). ---- */
+.dash-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dash-aurora i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(28px);
+  will-change: transform;
+}
+
+.dash-aurora i:nth-child(1) {
+  left: -38%;
+  bottom: -14%;
+  width: 130%;
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.20) 0%,
+    rgba(124, 58, 237, 0.09) 18%,
+    rgba(124, 58, 237, 0.035) 36%,
+    rgba(124, 58, 237, 0) 60%
+  );
+  animation: sb-aurora-a 16s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+}
+
+.dash-aurora i:nth-child(2) {
+  right: -48%;
+  bottom: 20%;
+  width: 115%;
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle,
+    rgba(196, 181, 253, 0.11) 0%,
+    rgba(196, 181, 253, 0.05) 20%,
+    rgba(196, 181, 253, 0.015) 38%,
+    rgba(196, 181, 253, 0) 62%
+  );
+  animation: sb-aurora-b 21s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+}
+
+/* deriva irregular (zig-zag con paradas, nunca un círculo) */
+@keyframes sb-aurora-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  31% {
+    transform: translate3d(16%, -8%, 0) scale(0.86);
+  }
+  64% {
+    transform: translate3d(-10%, 12%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(8%, -4%, 0) scale(0.95);
+  }
+}
+
+@keyframes sb-aurora-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.92);
+  }
+  37% {
+    transform: translate3d(-14%, 10%, 0) scale(1.14);
+  }
+  72% {
+    transform: translate3d(10%, -12%, 0) scale(0.85);
+  }
+  100% {
+    transform: translate3d(-6%, 6%, 0) scale(1.05);
+  }
+}
+
+/* ---- CABECERA DEL RAIL: marca + colapsar ---- */
+.dash-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sb-2);
+  /* FRANJA EXACTA del header del panel: compensa el padding del scroll
+     para cubrir y=0…72 del viewport — el contenido queda centrado en la
+     MISMA franja que el título del módulo, y la línea a 72px cierra. */
+  height: var(--dapp-header-h, 72px);
+  margin: calc(-1 * var(--sb-4)) calc(-1 * var(--sb-3)) 0;
+  padding: 0 var(--sb-3) 0;
+  border-bottom: none;
+  flex: none;
+}
+
+/* ---- MARCA: estática, sin navegación ---- */
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-3);
+  min-width: 0;
+  color: var(--sb-ink);
+}
+
+/* el outline global de base.css es ámbar: en el rail siempre es morado */
+.dash-home:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: 2px;
+  border-radius: var(--sb-radius-sm);
+}
+
+.dash-logo {
+  width: 30px;
+  height: auto;
+  flex: none;
+  transition: transform var(--sb-dur) var(--sb-spring);
+}
+
+.dash-brand:hover .dash-logo {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.dash-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-0);
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.dash-brand-name {
+  font-size: var(--sb-text-lg);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--sb-ink);
+}
+
+/* ---- SECCIÓN DE NAVEGACIÓN ---- */
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--sb-1);
+}
+
+.dash-caption {
+  margin: 0 0 var(--sb-1) var(--sb-1);
+  font-size: var(--sb-text-2xs);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--sb-ink-2);
+}
+
+/* ---- LISTA + PÍLDORA DESLIZANTE ---- */
+.dash-nav-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-1);
+}
+
+/* la píldora compartida: misma interacción de muelle que el navbar.
+   Su posición nace de --active-idx (0…4) — cero JS de layout. */
+.dash-pill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--sb-item-h);
+  border-radius: var(--sb-radius-sm);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.30) 0%, rgba(139, 92, 246, 0.12) 68%, rgba(139, 92, 246, 0.08) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.38);
+  box-shadow:
+    var(--sb-glow-accent),
+    inset 0 1px 0 rgba(196, 181, 253, 0.14);
+  transform: translateY(calc(var(--active-idx, 0) * var(--sb-step)));
+  transition: transform var(--sb-dur-slow) var(--sb-spring), width var(--sb-dur) var(--sb-ease);
+  pointer-events: none;
+}
+
+/* ---- ITEM ---- */
+.dash-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sb-2);
+  width: 100%;
+  height: var(--sb-item-h);
+  padding: 0 var(--sb-3);
+  color: var(--sb-ink-2);
+  background: none;
+  border: none;
+  border-radius: var(--sb-radius-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sb-font);
+  font-size: var(--sb-text-md);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition:
+    color var(--sb-dur-fast) var(--sb-ease),
+    background var(--sb-dur-fast) var(--sb-ease),
+    transform var(--sb-dur-fast) var(--sb-ease);
+}
+
+.dash-link:hover {
+  color: var(--sb-ink);
+  background: rgba(139, 92, 246, 0.07);
+}
+
+.dash-link:active {
+  transform: scale(0.985);
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.dash-link:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: -2px;
+}
+
+.dash-link:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dash-link.active {
+  color: var(--sb-ink);
+}
+
+.dash-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--sb-ink-3);
+  transition: color var(--sb-dur-fast) var(--sb-ease), transform var(--sb-dur) var(--sb-spring);
+}
+
+.dash-link:hover .dash-ic {
+  color: var(--sb-ink-2);
+  transform: translateY(-1px);
+}
+
+.dash-link.active .dash-ic {
+  color: var(--sb-ink);
+  filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.5));
+}
+
+.dash-link-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* punto semántico: wallet conectada (solo en el item wallet) */
+.dash-link .dot {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--sb-ink-3);
+}
+
+.dash-link .dot.on {
+  background: var(--sb-ok);
+  box-shadow: var(--sb-glow-ok);
+}
+
+/* ---- TARJETA DE WALLET ---- */
+.dash-wallet {
+  margin-top: auto;
+  margin-bottom: var(--sb-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-1);
+  border: 1px solid rgba(167, 139, 250, 0.16);
+  border-radius: var(--sb-radius-sm);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.10) 0%, rgba(10, 7, 16, 0.38) 90%);
+  padding: var(--sb-2) var(--sb-3);
+}
+
+.dash-wallet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sb-2);
+  min-width: 0;
+}
+
+.dash-wallet-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-1);
+  flex: none;
+}
+
+/* kebab compacto dentro de la tarjeta */
+.dash-wallet .dash-mini-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.dash-wallet-label {
+  font-size: var(--sb-text-2xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sb-ink-2);
+}
+
+.dash-wallet-state {
+  font-size: var(--sb-text-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: var(--sb-0) var(--sb-2);
+  border-radius: 999px;
+  border: 1px solid var(--sb-line-strong);
+  color: var(--sb-ink-2);
+  transition: color var(--sb-dur) var(--sb-ease), border-color var(--sb-dur) var(--sb-ease), background var(--sb-dur) var(--sb-ease);
+}
+
+.dash-wallet-state.on {
+  color: var(--sb-ok);
+  border-color: rgba(110, 231, 183, 0.45);
+  background: rgba(110, 231, 183, 0.08);
+}
+
+.dash-wallet-state.off {
+  color: var(--sb-ink-2);
+  border-color: var(--sb-line);
+}
+
+.dash-wallet-addr {
+  margin: 0;
+  font-size: var(--sb-text-sm);
+  letter-spacing: 0.02em;
+  color: var(--sb-ink);
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.dash-wallet-net {
+  margin: 0;
+  font-size: var(--sb-text-2xs);
+  letter-spacing: 0.06em;
+  color: var(--sb-ink-2);
+}
+
+/* ---- PIE: regla que se disuelve + "Inicio" como botón fantasma ---- */
+.dash-foot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sb-2);
+  margin-top: var(--sb-1);
+  padding-top: var(--sb-3);
+}
+
+/* hairline degradada (la sec-rule de la landing, en miniatura) */
+.dash-foot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(196, 181, 253, 0.18), rgba(196, 181, 253, 0));
+}
+
+.dash-foot-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-2);
+}
+
+.dash-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: var(--sb-radius-sm);
+  font-size: var(--sb-text-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--sb-ink-2);
+  text-decoration: none;
+  transition:
+    color var(--sb-dur-fast) var(--sb-ease),
+    background var(--sb-dur-fast) var(--sb-ease);
+}
+
+.dash-home:hover {
+  color: var(--sb-accent-2);
+  background: rgba(139, 92, 246, 0.08);
+  text-decoration: none;
+}
+
+.dash-home-ic {
+  display: inline-flex;
+  transform: scaleX(-1); /* la flecha del set apunta a la derecha */
+}
+
+.dash-version {
+  font-size: var(--sb-text-2xs);
+  letter-spacing: 0.08em;
+  color: var(--sb-ink-2);
+  opacity: 0.85;
+}
+
+/* botones cuadrados del rail: tuerca (red), kebab (wallet), colapso */
+.dash-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius-sm);
+  background: none;
+  color: var(--sb-ink-2);
+  cursor: pointer;
+  transition:
+    color var(--sb-dur-fast) var(--sb-ease),
+    border-color var(--sb-dur-fast) var(--sb-ease),
+    background var(--sb-dur-fast) var(--sb-ease),
+    transform var(--sb-dur-fast) var(--sb-ease);
+}
+
+.dash-mini-btn:hover {
+  color: var(--sb-accent-2);
+  border-color: var(--sb-line-strong);
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.dash-mini-btn:active {
+  transform: scale(0.92);
+}
+
+.dash-mini-btn:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: 2px;
+}
+
+/* el icono mira a la izquierda (plegar) y da la vuelta al expandir */
+.dash-collapse-ic {
+  display: inline-flex;
+  transform: scaleX(-1);
+  transition: transform var(--sb-dur) var(--sb-ease);
+}
+
+.dash-side.collapsed .dash-collapse-ic {
+  transform: none;
+}
+
+/* ---- COLETA DE EXPANSI�N (solo rail colapsado) ----
+   Leng�eta semicuadrada PEGADA A LA L�NEA DEL HEADER: nace del filo
+   derecho del rail colapsado, cruzando la l�nea como una muesca abierta.
+   Mismo material compuesto del rail, con BORDES visibles. Su posici�n
+   (position:fixed, top/left) se mide desde el viewport porque es
+   HERMANA del aside � fuera de su stacking context, flotando sobre el
+   header del panel. */
+.dash-expand-tail {
+  /* Token scope: al ser HERMANA del aside, las var --sb-* de .dash-side
+     NO le llegan — se redeclaran aquí. */
+  --sb-rail-collapsed: 76px;
+  --sb-border: 1px solid rgba(196, 181, 253, 0.12);
+  --sb-accent-2: var(--purple-300, #c4b5fd);
+  --dapp-header-h: 72px; /* sincronizada con dapp.css */
+  --sb-dur-fast: 140ms;
+  --sb-dur: 240ms;
+  --sb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --sb-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: fixed;
+  /* A LA ALTURA DEL LOGO: franja del header centrada (0…72 ⇒ centro 36);
+     coleta de 36px ⇒ top = 36 − 18 = 18px (misma franja del logo) */
+  top: calc(var(--dapp-header-h) / 2 - 18px);
+  /* PEGADA AL FILO: comparte el borde del rail (−1px), cero hueco */
+  left: calc(var(--sb-rail-collapsed) - 1px);
+  z-index: 45; /* sobre el .dapp-header (z 40) que la taparía */
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 36px;
+  padding: 0;
+  border: var(--sb-border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(180deg, #171030, #100a22);
+  color: var(--sb-accent-2);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  /* entrada rápida / SALIDA RETARDADA (el delay lo aplica la clase
+     is-awake al apagarse: la gracia de 600ms vive en JS) */
+  transition:
+    opacity var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur) var(--sb-ease),
+    background var(--sb-dur-fast) var(--sb-ease),
+    color var(--sb-dur-fast) var(--sb-ease);
+}
+/* despierta (JS: hover en cabecera/logo o en la coleta misma) */
+.dash-expand-tail.is-awake {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition:
+    opacity var(--sb-dur) var(--sb-ease),
+    transform var(--sb-dur) var(--sb-spring),
+    background var(--sb-dur-fast) var(--sb-ease),
+    color var(--sb-dur-fast) var(--sb-ease);
+}
+.dash-expand-tail:hover {
+  background: linear-gradient(180deg, #221845, #171030);
+  color: var(--white);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.35);
+}
+
+.dash-expand-tail:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: 2px;
+}
+
+/* la coleta mira a la derecha (expandir): sin voltear su flecha */
+.dash-expand-tail .dash-collapse-ic {
+  transform: none;
+}
+
+/* ---- HAMBURGER (solo móvil) ---- */
+.dash-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  background: var(--sb-rail);
+  border: var(--sb-border);
+  border-radius: var(--sb-radius-sm);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--sb-ink);
+  cursor: pointer;
+  font-family: var(--sb-font);
+  transition: border-color var(--sb-dur-fast) var(--sb-ease), transform var(--sb-dur-fast) var(--sb-ease);
+}
+
+.dash-menu-btn:hover {
+  border-color: var(--sb-line-strong);
+}
+
+.dash-menu-btn:active {
+  transform: scale(0.94);
+}
+
+.dash-menu-btn:focus-visible {
+  outline: 2px solid var(--sb-accent);
+  outline-offset: 2px;
+}
+
+.dash-menu-btn span {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 12px;
+}
+
+.dash-menu-btn span i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition:
+    transform var(--sb-dur) var(--sb-ease),
+    top var(--sb-dur) var(--sb-ease),
+    opacity var(--sb-dur-fast) var(--sb-ease);
+}
+
+.dash-menu-btn span i:nth-child(1) { top: 0; }
+.dash-menu-btn span i:nth-child(2) { top: 5px; }
+.dash-menu-btn span i:nth-child(3) { top: 10px; }
+
+.dash-menu-btn span.open i:nth-child(1) {
+  top: 5px;
+  transform: rotate(45deg);
+}
+
+.dash-menu-btn span.open i:nth-child(2) {
+  opacity: 0;
+}
+
+.dash-menu-btn span.open i:nth-child(3) {
+  top: 5px;
+  transform: rotate(-45deg);
+}
+
+.dash-scrim {
+  display: none;
+}
+
+/* ============ COLAPSO (solo desktop: en móvil el drawer va siempre completo) ============ */
+@media (min-width: 901px) {
+  .dash-side.collapsed {
+    width: var(--sb-rail-collapsed);
+  }
+
+  .dash-side.collapsed .dash-scroll {
+    padding-inline: var(--sb-1);
+  }
+
+  .dash-side.collapsed .dash-side-head {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sb-2);
+    padding: 0 var(--sb-1); /* más ajustado en el rail angosto */
+  }
+
+  /* la línea del header SÍ cruza el rail colapsado: alineada con la del
+     contenido (misma var). El ::after del aside ya la dibuja. */
+
+  /* al colapsar, el botón del header NO existe: la coleta del filo es
+     el único control de expansión (hover en la franja del logo) */
+  .dash-side.collapsed .dash-collapse-btn {
+    display: none;
+  }
+
+  .dash-side.collapsed .dash-brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .dash-side.collapsed .dash-brand-text {
+    display: none;
+  }
+
+  .dash-side.collapsed .dash-caption {
+    display: none;
+  }
+
+  .dash-side.collapsed .dash-link {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .dash-side.collapsed .dash-link-label,
+  .dash-side.collapsed .dash-link .dot {
+    display: none;
+  }
+
+  /* la píldora se encoge a un cuadrado centrado tras el icono */
+  .dash-side.collapsed .dash-pill {
+    left: 50%;
+    right: auto;
+    width: 38px;
+    transform: translate(-50%, calc(var(--active-idx, 0) * var(--sb-step)));
+  }
+
+  .dash-side.collapsed .dash-wallet {
+    display: none;
+  }
+
+  .dash-side.collapsed .dash-foot {
+    justify-content: center;
+    margin-top: auto;
+  }
+
+  .dash-side.collapsed .dash-home,
+  .dash-side.collapsed .dash-version {
+    display: none;
+  }
+}
+
+/* ============ RESPONSIVE (drawer móvil) ============ */
+@media (max-width: 900px) {
+  .dash-side {
+    z-index: 60;
+    transform: translateX(calc(-100% - var(--sb-2)));
+    transition: transform var(--sb-dur-slow) var(--sb-ease);
+  }
+
+  .dash-side.open {
+    transform: none;
+    box-shadow:
+      0 2px 10px rgba(3, 0, 12, 0.4),
+      0 24px 64px rgba(3, 0, 12, 0.6);
+  }
+
+/* en el drawer no tiene sentido el colapso */
+.dash-collapse-btn {
+  display: none;
+}
+
+.dash-expand-tail {
+  display: none;
+}
+
+  .dash-menu-btn {
+    display: inline-flex;
+  }
+
+  .dash-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(5, 3, 16, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    border: none;
+    padding: 0;
+    cursor: default;
+  }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce) {
+  .dash-aurora i,
+  .dash-logo,
+  .dash-ic,
+  .dash-collapse-ic {
+    animation: none;
+    transition: none;
+  }
+
+  .dash-side,
+  .dash-pill,
+  .dash-link,
+  .dash-link .dash-ic {
+    transition: none;
+  }
+}

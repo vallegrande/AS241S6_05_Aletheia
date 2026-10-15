@@ -1,0 +1,1743 @@
+/**
+ * dapp.css — sistema visual ÚNICO de la DApp (#/panel).
+ *
+ * Compacto y denso (herramienta, no landing): controles de 40px, ritmo
+ * vertical corto, una sola superficie, filas y chips pequeños.
+ * Tokens del sistema global (base.css): --border, --radius-sm, --s-*.
+ */
+
+/* ---- contenedor: deja sitio al rail fijo de 260px (colapsable a 76px) ---- */
+.dapp {
+  /* alto del header fijo y borde izquierdo del header (= ancho del rail):
+     rail y paddings beben de aquí */
+  --dapp-header-h: 72px;
+  --dapp-rail-w: 260px;
+  width: 100%;
+  /* TODO el ancho del área de contenido: sin tope ni centraje */
+  max-width: none;
+  margin-inline: 0;
+  /* arranca ARRIBA: solo el respiro del header fijo */
+  padding: calc(var(--dapp-header-h) + 8px) 32px var(--s-6) 292px;
+  display: flex;
+  flex-direction: column;
+  transition: padding 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* rail colapsado: header y contenido se acercan al borde (76px + 32 de gutter) */
+@media (min-width: 901px) {
+  .dapp.collapsed {
+    --dapp-rail-w: 76px;
+    padding-left: 108px;
+  }
+}
+
+/* ---- header del panel: FIJO arriba, SOLO la zona del costado —
+      arranca en el borde derecho del rail (que llega hasta arriba)
+      y cubre hasta el viewport. Mismo vidrio oscuro del rail;
+      el padding izquierdo (32px) alinea el saludo con el contenido. ---- */
+.dapp-header {
+  position: fixed;
+  top: 0;
+  left: var(--dapp-rail-w, 260px);
+  right: 0;
+  z-index: 40;
+  height: var(--dapp-header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: 0 16px 0 32px;
+  background: rgba(8, 5, 20, 0.72);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  border-bottom: 1px solid rgba(196, 181, 253, 0.12);
+  transition: left 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dapp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* saludo: vive EN el header, a su altura. Sin sesión → "Panel" neutro. */
+.dapp-hello {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dapp-hello.dry {
+  color: var(--gray-500);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* ---- título dinámico del módulo (cambia con la pestaña activa) ---- */
+.dapp-module-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  border: 1px solid rgba(196, 181, 253, 0.22);
+  background: rgba(124, 58, 237, 0.14);
+  color: var(--purple-300);
+}
+
+.dapp-module-head {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dapp-module-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  line-height: 1.15;
+  animation: module-swap 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dapp-module-sub {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--sb-ink-2, var(--gray-400));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: module-swap 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes module-swap {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.dapp-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex: none;
+}
+
+/* ---- dashboard: rail fijo 260px colapsable (sidebar.css), header + main ---- */
+.dash-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dapp [role='tabpanel'][hidden] {
+  display: none;
+}
+
+/* el panel vive en el mundo Nocturne: el foco es violeta, no ámbar */
+.dapp .btn:focus-visible,
+.dapp a:focus-visible,
+.dapp input:focus-visible,
+.dapp select:focus-visible,
+.dapp button:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+/* los botones primarios del panel son violeta (no el ámbar de la landing) */
+.dapp .btn-primary {
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.5), rgba(109, 40, 217, 0.42));
+  border: 1px solid rgba(196, 181, 253, 0.32);
+  color: var(--gray-050);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.16);
+}
+
+.dapp .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(124, 58, 237, 0.5));
+  border-color: rgba(196, 181, 253, 0.6);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+}
+
+/* ---- sección: arranca pegada arriba (solo respiro mínimo) ---- */
+.dapp-section {
+  padding-block: 0 var(--s-5);
+  scroll-margin-top: 120px;
+}
+
+/* AuthGate es solo una puerta lógica: cero espaciado propio (el componente
+   ya no trae padding de la landing). Solo se ajusta su tarjeta de login
+   para el contexto compacto del panel/modal. */
+.dapp .auth-gate .gate-locked {
+  padding-block: var(--s-2);
+}
+
+.dapp .auth-gate .lock-card {
+  padding: var(--s-4);
+  gap: var(--s-2);
+}
+
+/* ---- cabecera de sección: eyebrow → título → descripción ---- */
+.dapp-shead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--s-3);
+  max-width: 76ch;
+}
+
+/* lenguaje del sidebar: captions grises + accents violeta */
+.dapp-eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--gray-500);
+}
+
+.dapp-eyebrow .idx {
+  color: var(--purple-300);
+}
+
+.dapp-stitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--white);
+}
+
+.dapp-sdesc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--gray-400);
+}
+
+/* ---- grid de contenido: config | estado/resultado ---- */
+.dapp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  align-items: start;
+}
+
+.dapp-grid.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* superficie única de trabajo: el vidrio Nocturne del rail */
+.dapp-pane {
+  --pane-line: rgba(196, 181, 253, 0.12);
+  --pane-line-strong: rgba(196, 181, 253, 0.24);
+  background: rgba(8, 5, 20, 0.72);
+  border: 1px solid var(--pane-line);
+  border-radius: 10px;
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.12);
+}
+
+.dapp-pane-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pane-line);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.dapp-pane-title .live {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 10px rgba(110, 231, 183, 0.6);
+}
+
+/* ---- campo de formulario: LABEL → INPUT → HELP ---- */
+.dapp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dapp-field > label,
+.dapp-field > .dapp-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sb-ink-2, var(--gray-400));
+}
+
+.dapp-field .dapp-help {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--gray-400);
+}
+
+.dapp-help {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.dapp-row {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dapp-row > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.dapp-row > select {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+/* controles compactos (el sistema global usa 48px; aquí 40px) */
+.dapp input,
+.dapp select {
+  min-height: 40px;
+  font-size: 0.88rem;
+  /* vidrio Nocturne: fondo translúcido y borde violeta discreto */
+  background: rgba(5, 3, 16, 0.55);
+  border: 1px solid rgba(196, 181, 253, 0.14);
+  border-radius: 10px;
+  color: var(--white);
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+}
+
+.dapp input::placeholder {
+  color: var(--gray-600);
+}
+
+.dapp input:hover:not(:disabled),
+.dapp select:hover:not(:disabled) {
+  border-color: rgba(196, 181, 253, 0.28);
+}
+
+.dapp input:focus,
+.dapp select:focus {
+  outline: none;
+  border-color: var(--purple-400);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.14), 0 0 18px rgba(124, 58, 237, 0.18);
+  background: rgba(5, 3, 16, 0.75);
+}
+
+.dapp input:disabled,
+.dapp select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dapp select {
+  width: 100%;
+  padding: 0 12px;
+}
+
+.dapp select:focus {
+  border-color: var(--purple-400);
+}
+
+.dapp .btn {
+  min-height: 40px;
+  font-size: 0.85rem;
+  padding: 0 var(--s-3);
+}
+
+.dapp .btn-sm {
+  min-height: 32px;
+  font-size: 0.78rem;
+  padding: 0 12px;
+}
+
+/* ---- filas de datos / resultados: mismo patrón en todas ---- */
+.dapp-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dapp-rowline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(196, 181, 253, 0.12);
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.06);
+  padding: 7px 10px;
+  min-width: 0;
+}
+
+.dapp-rowline .k {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.dapp-rowline .v {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gray-200);
+  word-break: break-all;
+  text-align: right;
+}
+
+button.dapp-rowline {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+button.dapp-rowline:hover:not(:disabled) {
+  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+button.dapp-rowline:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+button.dapp-rowline[aria-pressed='true'] {
+  border-color: rgba(167, 139, 250, 0.6);
+  background: rgba(124, 58, 237, 0.14);
+}
+
+/* kv compacto dentro de paneles */
+.dapp-kv {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px var(--s-3);
+}
+
+.dapp-kv .span-all {
+  grid-column: 1 / -1;
+}
+
+.dapp-kv dd {
+  font-size: 0.88rem;
+}
+
+/* ---- chips de estado: un solo componente ---- */
+.dapp-chip {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-600);
+  color: var(--gray-400);
+  flex: none;
+  white-space: nowrap;
+}
+
+.dapp-chip.ok {
+  color: var(--ok);
+  border-color: rgba(110, 231, 183, 0.45);
+  background: rgba(110, 231, 183, 0.07);
+}
+
+.dapp-chip.warn {
+  color: var(--warn);
+  border-color: rgba(252, 211, 77, 0.4);
+}
+
+.dapp-chip.err {
+  color: var(--err);
+  border-color: rgba(253, 164, 175, 0.4);
+  background: rgba(253, 164, 175, 0.06);
+}
+
+.dapp-chip.info {
+  color: var(--purple-300);
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(124, 58, 237, 0.14);
+}
+
+/* pasos en línea (pipeline de tx): una sola fila, sin lista vertical */
+.dapp-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.dapp-steps .sep {
+  color: var(--gray-600);
+  font-size: 0.75rem;
+}
+
+/* ---- mensajes de estado: un solo patrón ---- */
+.dapp-status {
+  margin: 0;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dapp-status[data-tone='ok'] {
+  color: var(--ok);
+}
+
+.dapp-status[data-tone='warn'] {
+  color: var(--warn);
+}
+
+.dapp-status[data-tone='error'] {
+  color: var(--err);
+}
+
+.dapp-status[data-tone='muted'] {
+  color: var(--gray-400);
+}
+
+.dapp-status .mini-spinner {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--black-600);
+  border-top-color: currentColor;
+  animation: spin 0.9s linear infinite;
+}
+
+.dapp-tech {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+/* cifra destacada (balances) */
+.dapp-figure {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.5rem;
+  color: var(--white);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.dapp-figure .unit {
+  font-size: 0.45em;
+  color: var(--purple-300);
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* checks */
+.dapp-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+
+.dapp-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--gray-050);
+}
+
+.dapp-check.dim {
+  opacity: 0.55;
+}
+
+.dapp-check input {
+  accent-color: var(--purple-500);
+  width: 15px;
+  height: 15px;
+  flex: none;
+  min-height: 0;
+}
+
+/* hash / valores largos */
+.dapp-break {
+  word-break: break-all;
+}
+
+/* botón icono cuadrado (copiar, explorador): misma altura que los controles */
+.dapp-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-height: 40px;
+  flex: none;
+  border: 1px solid rgba(196, 181, 253, 0.14);
+  border-radius: 10px;
+  background: rgba(5, 3, 16, 0.55);
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+a.dapp-iconbtn {
+  text-decoration: none;
+}
+
+a.dapp-iconbtn:hover {
+  text-decoration: none;
+}
+
+.dapp-iconbtn:hover {
+  border-color: rgba(167, 139, 250, 0.5);
+  color: var(--white);
+}
+
+/* ==================================================================
+   MÓDULO DE CONSULTAS (individual | masiva) — paneles de vidrio
+   Nocturne coherentes con Transacciones: campo + consulta unificados,
+   resultados como filas-legertas con la cifra alineada a la derecha.
+   ================================================================== */
+.q-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(8, 5, 20, 0.72);
+  border: 1px solid rgba(196, 181, 253, 0.12);
+  border-radius: 10px;
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.12);
+  padding: var(--s-4);
+  max-width: 860px;
+}
+
+.q-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* fila única del formulario: address (con wallet anclado dentro) → red → CTA.
+   Grid de 3 columnas: el input toma el resto, el combobox y el CTA quedan fijos. */
+.q-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px auto;
+  gap: 10px;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+}
+
+/* contenedor relativo: el input ocupa todo y "Mi wallet" flota dentro */
+.q-input-wrap {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.q-input-wrap .q-input {
+  width: 100%;
+  /* respiro derecho para el botón "Mi wallet" anclado dentro */
+  padding-right: 108px;
+}
+
+.q-input-wrap > .q-mini {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  transform: translateY(-50%);
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.q-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gray-400);
+}
+
+.q-label .req {
+  color: var(--gray-600);
+}
+
+/* el gran campo de dirección: protagonista del formulario */
+.q-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid rgba(196, 181, 253, 0.14);
+  border-radius: 10px;
+  background: rgba(5, 3, 16, 0.55);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+}
+
+.q-input::placeholder {
+  color: var(--gray-600);
+}
+
+.q-input:hover:not(:disabled) {
+  border-color: rgba(196, 181, 253, 0.3);
+}
+
+.q-input:focus {
+  outline: none;
+  border-color: var(--purple-400);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.14), 0 0 18px rgba(124, 58, 237, 0.18);
+  background: rgba(5, 3, 16, 0.78);
+}
+
+select.q-input {
+  flex: none;
+  width: auto;
+  min-width: 180px;
+  cursor: pointer;
+  appearance: none;
+  padding: 0 38px 0 14px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--gray-400) 50%),
+    linear-gradient(135deg, var(--gray-400) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* ---- combobox de redes (NetworkSelect): trigger + listbox Nocturne ---- */
+.net-sel {
+  position: relative;
+  flex: 0 0 200px;
+  min-width: 0;
+}
+
+.ns-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px 0 14px;
+  border: 1px solid rgba(196, 181, 253, 0.14);
+  border-radius: 10px;
+  background: rgba(5, 3, 16, 0.55);
+  color: var(--white);
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+}
+
+.ns-trigger:hover {
+  border-color: rgba(196, 181, 253, 0.3);
+}
+
+.ns-trigger.open,
+.ns-trigger:focus-visible {
+  outline: none;
+  border-color: var(--purple-400);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.14), 0 0 18px rgba(124, 58, 237, 0.18);
+  background: rgba(5, 3, 16, 0.78);
+}
+
+.ns-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 181, 253, 0.14);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--purple-300);
+}
+
+.ns-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ns-name {
+  font-size: 0.86rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ns-sym {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--gray-400);
+  flex: none;
+}
+
+.ns-test {
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(252, 211, 77, 0.4);
+  color: var(--warn);
+  flex: none;
+}
+
+.ns-chevron {
+  display: inline-flex;
+  flex: none;
+  color: var(--gray-400);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ns-trigger.open .ns-chevron {
+  transform: rotate(180deg);
+  color: var(--purple-300);
+}
+
+.ns-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  width: max(100%, 280px);
+  max-height: 342px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  border-radius: 12px;
+  background: rgba(10, 6, 26, 0.95);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55), 0 0 26px rgba(124, 58, 237, 0.16);
+  animation: ns-open 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  /* scrollbar NUNCA visible: el sistema global la oculta (base.css) y el
+     menú se recorre con rueda/teclado/gesto */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ns-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@keyframes ns-open {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* reset del ul anidado: sin el padding-inline de 40px del navegador */
+.ns-group,
+.ns-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ns-group-label {
+  /* sejajar dengan kolom TEKS opsi: label mulai di 7, teks opsi di 53 → pad 46 */
+  margin: 6px 0 2px;
+  padding: 0 10px 0 46px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gray-500);
+}
+
+.ns-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.ns-opt.active {
+  background: rgba(124, 58, 237, 0.18);
+}
+
+.ns-opt.selected {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.ns-opt.active.selected,
+.ns-opt.selected .ns-ic {
+  background: rgba(124, 58, 237, 0.24);
+}
+
+.ns-opt-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ns-opt-sym {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--gray-400);
+  flex: none;
+}
+
+.ns-check {
+  display: inline-flex;
+  flex: none;
+  color: var(--purple-300);
+}
+
+/* CTA plano morado (mismo lenguaje que w-connect) */
+.q-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  flex: none;
+  border: none;
+  border-radius: 10px;
+  background: var(--purple-600);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, box-shadow 0.25s ease;
+}
+
+.q-go:hover:not(:disabled) {
+  background: var(--purple-500);
+  box-shadow: 0 0 18px rgba(124, 58, 237, 0.35);
+}
+
+.q-go:active:not(:disabled) {
+  background: var(--purple-700);
+}
+
+.q-go:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.q-go:focus-visible {
+  outline: 2px solid var(--purple-300);
+  outline-offset: 2px;
+}
+
+.q-go.block {
+  width: 100%;
+}
+
+/* botón secundario fantasma (Mi wallet) */
+.q-mini {
+  min-height: 46px;
+  padding: 0 14px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(196, 181, 253, 0.18);
+  border-radius: 10px;
+  background: none;
+  color: var(--gray-100);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.q-mini:hover {
+  border-color: rgba(196, 181, 253, 0.45);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--white);
+}
+
+.q-mini:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+/* etiqueta de grupo: [checkbox maestro + texto] ←→ [acciones], con línea divisoria */
+.q-sub {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gray-500);
+}
+
+/* izquierda: checkbox + texto pegados */
+.q-sub-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.q-sub-text {
+  white-space: nowrap;
+}
+
+/* empuja las acciones a la derecha con línea divisoria sutil */
+.q-sub-left::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: rgba(196, 181, 253, 0.16);
+  margin-left: 2px;
+}
+
+.q-sub-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-left: 4px;
+}
+
+/* contador de la etiqueta de redes */
+.q-count {
+  color: var(--purple-300);
+  font-weight: 600;
+}
+
+/* checkbox maestro: marca/desmarca todas las redes (all | some | none) */
+.q-master {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex: none;
+}
+
+.q-master:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.q-master:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.q-master-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid var(--gray-600);
+  border-radius: 5px;
+  background: rgba(5, 3, 16, 0.5);
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.2s ease;
+}
+
+.q-master:hover:not(:disabled) .q-master-box {
+  border-color: var(--purple-400);
+}
+
+/* marcada (todas): caja violeta + check */
+.q-master.on .q-master-box {
+  border-color: var(--purple-300);
+  background: rgba(167, 139, 250, 0.9);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.35);
+}
+
+.q-master-check {
+  display: inline-flex;
+  color: #150a2e;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.16s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.q-master.on .q-master-check {
+  opacity: 1;
+  transform: none;
+}
+
+/* parcial (some): guion morado sobre caja oscura */
+.q-master-dash {
+  position: absolute;
+  width: 9px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--purple-300);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.q-master-box {
+  position: relative;
+}
+
+.q-master[aria-checked='mixed'] .q-master-box {
+  border-color: var(--purple-400);
+  background: rgba(124, 58, 237, 0.25);
+}
+
+.q-master[aria-checked='mixed'] .q-master-dash {
+  opacity: 1;
+  transform: none;
+}
+
+.q-master[aria-checked='mixed'] .q-master-check {
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+.q-ghost {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.q-ghost:hover:not(:disabled) {
+  color: var(--purple-300);
+}
+
+.q-ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.q-ghost:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+.q-ghost-sep {
+  color: var(--gray-600);
+  font-size: 0.62rem;
+}
+
+/* grupos de familias de red (EVM / UTXO) */
+.q-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.q-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* cabecera de familia: etiqueta + toggle Marcar/Desmarcar del grupo */
+.q-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.q-group-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gray-500);
+}
+
+.q-group-label::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--purple-400);
+  vertical-align: 1px;
+  opacity: 0.7;
+}
+
+.q-group-toggle {
+  font-size: 0.6rem;
+}
+
+/* chips de redes (consulta masiva): checklist con caja visual */
+.q-nets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+/* caja del checklist: cuadrada, se llena de violeta al marcar */
+.q-net-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  flex: none;
+  border: 1.5px solid var(--gray-600);
+  border-radius: 5px;
+  background: rgba(5, 3, 16, 0.5);
+  color: transparent;
+  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.2s ease;
+}
+
+.q-net-box svg {
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.16s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* marcada: caja violeta con check visible */
+.q-net.on .q-net-box,
+.q-net-box.checked {
+  border-color: var(--purple-300);
+  background: rgba(167, 139, 250, 0.9);
+  color: #150a2e;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.35);
+}
+
+.q-net.on .q-net-box svg,
+.q-net-box.checked svg {
+  opacity: 1;
+  transform: none;
+}
+
+.q-net:hover .q-net-box {
+  border-color: var(--purple-400);
+}
+
+.q-net {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(196, 181, 253, 0.12);
+  border-radius: 10px;
+  background: rgba(5, 3, 16, 0.45);
+  color: var(--gray-200);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.2s ease;
+}
+
+.q-net:hover {
+  border-color: rgba(196, 181, 253, 0.3);
+  color: var(--white);
+}
+
+.q-net.on {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(124, 58, 237, 0.14);
+  color: var(--white);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.18);
+}
+
+.q-net.dim {
+  opacity: 0.4;
+}
+
+.q-net:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: -2px;
+}
+
+.q-net-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.q-net-sym {
+  font-size: 0.68rem;
+  color: var(--gray-400);
+  flex: none;
+}
+
+/* resultado individual: banda de resultado con la cifra protagonista */
+.q-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  border-radius: 12px;
+  background: linear-gradient(155deg, rgba(124, 58, 237, 0.1), rgba(5, 3, 16, 0.4) 60%);
+  animation: q-reveal 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.q-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.q-fig {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+
+.q-fig .q-unit {
+  font-size: 0.45em;
+  font-weight: 600;
+  margin-left: 8px;
+  color: var(--purple-300);
+  letter-spacing: 0;
+}
+
+.q-meta {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.q-addr {
+  color: var(--gray-200);
+  word-break: break-all;
+}
+
+/* copiar dirección: micro-botón fantasma con feedback de check */
+.q-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  border-radius: 8px;
+  background: none;
+  color: var(--gray-300);
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.q-copy:hover {
+  border-color: rgba(196, 181, 253, 0.5);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--white);
+}
+
+.q-copy.on {
+  color: var(--ok);
+  border-color: rgba(110, 231, 183, 0.45);
+}
+
+.q-copy:focus-visible {
+  outline: 2px solid var(--purple-400);
+  outline-offset: 2px;
+}
+
+.q-meta .q-sep {
+  color: var(--gray-600);
+}
+
+.q-meta .q-addr {
+  max-width: 100%;
+}
+
+.q-link {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  border-radius: 999px;
+  color: var(--purple-300);
+  font-size: 0.74rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.q-link:hover {
+  border-color: rgba(196, 181, 253, 0.5);
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--white);
+  text-decoration: none;
+}
+
+/* skeleton de carga: sustituye al status durante la consulta */
+.q-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid rgba(196, 181, 253, 0.08);
+  border-radius: 12px;
+  background: rgba(5, 3, 16, 0.3);
+}
+
+.q-skel-line,
+.q-skel-chip {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(196, 181, 253, 0.06) 25%,
+    rgba(196, 181, 253, 0.14) 37%,
+    rgba(196, 181, 253, 0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: q-shimmer 1.4s ease infinite;
+}
+
+.q-skel-line {
+  width: 55%;
+  height: 30px;
+}
+
+.q-skel-chip {
+  width: 132px;
+  height: 12px;
+}
+
+@keyframes q-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes q-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.q-empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--gray-500);
+}
+
+/* resultados por red (masiva) */
+.q-sum {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  animation: q-reveal 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* filas de resultado: tabla liviana con cabezas */
+.q-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(196, 181, 253, 0.12);
+}
+
+.q-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(196, 181, 253, 0.08);
+  min-width: 0;
+  transition: background 0.15s ease;
+}
+
+.q-item:hover {
+  background: rgba(124, 58, 237, 0.04);
+}
+
+.q-item.dim {
+  opacity: 0.5;
+}
+
+.q-item-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px rgba(110, 231, 183, 0.5);
+}
+
+.q-item.err .q-item-dot {
+  background: var(--err);
+  box-shadow: 0 0 8px rgba(253, 164, 175, 0.4);
+}
+
+.q-item.pend .q-item-dot {
+  background: var(--gray-600);
+  animation: pulse-dot 1.6s ease infinite;
+}
+
+/* texto "consultando…" de filas pendientes */
+.q-item-val.pending-text {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--gray-500);
+}
+
+.q-item-unit {
+  font-size: 0.72em;
+  font-weight: 600;
+  margin-left: 4px;
+  color: var(--purple-300);
+}
+
+.q-item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.q-item-val {
+  flex: 1;
+  text-align: right;
+  font-family: var(--font-display, 'Geist Sans', system-ui, sans-serif);
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  white-space: nowrap;
+}
+
+.q-item.err .q-item-val {
+  color: var(--err);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 400;
+  max-width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* explorador por fila: icono mini (mismo micro-botón del módulo de tx) */
+.q-item a.dash-mini-btn {
+  flex: none;
+  text-decoration: none;
+  color: var(--gray-200);
+  background: none;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+}
+
+.q-item a.dash-mini-btn:hover {
+  color: var(--white);
+  border-color: rgba(196, 181, 253, 0.45);
+}
+
+/* ---- responsive: grids ---- */
+@media (max-width: 900px) {
+  .dapp-grid,
+  .dapp-grid.cols-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dapp {
+    padding: calc(var(--dapp-header-h) + var(--s-3)) 24px var(--s-6);
+  }
+
+  /* el rail es un drawer oculto: el header cubre todo el ancho */
+  .dapp-header {
+    left: 0;
+    padding: 0 12px;
+    transition: none;
+  }
+
+  /* formulario individual en 2 niveles: address (fila 1) → red + CTA (fila 2) */
+  .q-field {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .q-input-wrap {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .dapp {
+    --dapp-header-h: 54px;
+    padding: calc(var(--dapp-header-h) + 10px) 20px var(--s-6);
+  }
+
+  /* en pantallas chicas: solo el título del módulo */
+  .dapp-hello { display: none; }
+  .dapp-module-sub { display: none; }
+
+  .dapp-pane {
+    padding: 12px;
+  }
+
+  .dapp-kv {
+    grid-template-columns: 1fr;
+  }
+
+  .dapp-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .q-row {
+    flex-wrap: wrap;
+  }
+
+  /* combobox de redes a ancho completo en pantallas chicas */
+  .net-sel {
+    flex: 1 1 100%;
+  }
+
+  .q-row .q-input {
+    min-width: 180px;
+  }
+
+  /* formulario individual: todo apilado en pantallas muy chicas.
+     "Mi wallet" sigue anclado DENTRO del input (alineación vertical perfecta) */
+  .q-field {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .q-field > .q-go {
+    width: 100%;
+  }
+}
+
+/* reduced-motion: sin shimmer ni pulsos */
+@media (prefers-reduced-motion: reduce) {
+  .q-skel-line,
+  .q-skel-chip {
+    animation: none;
+  }
+
+  .q-item.pend .q-item-dot {
+    animation: none;
+  }
+
+  .q-result,
+  .q-sum {
+    animation: none;
+  }
+
+  .q-net-box,
+  .q-net-box svg,
+  .q-master-box,
+  .q-master-check,
+  .q-master-dash {
+    transition: none;
+  }
+}

@@ -1,0 +1,639 @@
+/**
+ * estilos/base.css — Sistema visual de Aletheia.
+ *
+ * Identidad: NEGRO + BLANCO + MORADO (el negro domina).
+ * Estética: Web3 editorial — sobria, tipográfica, con luz púrpura ambiental
+ * (inspirada en FeralUI Gradients usado como recurso secundario).
+ *
+ * SIN: glassmorphism exagerado, neon, multicolor, bento genérico.
+ */
+
+/* ============ Tokens ============ */
+:root {
+  /* Escala de negro (fondo → superficie → elevada) */
+  --black-950: #050308;
+  --black-900: #0a0710;
+  --black-850: #0f0b16;
+  --black-800: #161022;
+  --black-700: #1e1730;
+  --black-600: #2a2140;
+
+  /* Blancos y grises */
+  --white: #ffffff;
+  --gray-050: #ecebf1;
+  --gray-200: #c9c5d6;
+  --gray-400: #9c96b0;
+  --gray-500: #726c86;
+  --gray-600: #565070;
+
+  /* Morado (acción / blockchain / estados activos) */
+  --purple-300: #c4b5fd;
+  --purple-400: #a78bfa;
+  --purple-500: #8b5cf6;
+  --purple-600: #7c3aed;
+  --purple-700: #6d28d9;
+
+  /* Cian (señal / lectura de datos / conexiones) */
+  --cyan-300: #67e8f9;
+  --cyan-400: #22d3ee;
+  --cyan-500: #06b6d4;
+
+  /* Ámbar / oro (acento global de marca — destellos, refuerzos) */
+  --amber-100: #ffe9b3;
+  --amber-200: #ffd977;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+
+  /* Semánticos de estado (tenues, nunca multicolor) */
+  --ok: #6ee7b7;
+  --warn: #fcd34d;
+  --err: #fda4af;
+
+  /* Tipografía — GEIST en toda la app (sans + mono, empaquetadas local) */
+  --font-display: 'Geist Sans', system-ui, sans-serif;
+  --font-body: 'Geist Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Ritmo (base 8px) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 16px;
+  --s-4: 24px;
+  --s-5: 32px;
+  --s-6: 48px;
+  --s-7: 64px;
+  --s-8: 96px;
+  --s-9: 128px;
+
+  /* Superficie */
+  --radius: 14px;
+  --radius-sm: 8px;
+  --border: 1px solid rgba(251, 191, 36, 0.14);
+  --border-strong: 1px solid rgba(251, 191, 36, 0.32);
+
+  /* Luz ambiental dorada (acento global) */
+  --glow-sm: 0 0 24px rgba(251, 191, 36, 0.12);
+  --glow-md: 0 8px 48px rgba(251, 191, 36, 0.16);
+  --glow-lg: 0 16px 80px rgba(251, 191, 36, 0.22);
+
+  /* Ancho editorial de lectura */
+  --measure: 66ch;
+}
+
+/* ============ Reset ============ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--black-950);
+  color: var(--gray-050);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* ============ Tipografía ============ */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--white);
+  line-height: 1.12;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--amber-300);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--amber-400);
+  text-decoration: underline;
+  text-decoration-color: rgba(251, 191, 36, 0.4);
+  text-underline-offset: 3px;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  letter-spacing: -0.01em;
+}
+
+.display-1 {
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.display-2 {
+  font-size: clamp(1.75rem, 3.5vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--amber-400);
+}
+
+.lead {
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  color: var(--gray-200);
+  line-height: 1.65;
+}
+
+.muted {
+  color: var(--gray-400);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+/* ============ Cabeceras de sección ============ */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-bottom: clamp(var(--s-6), 6vh, var(--s-8));
+}
+
+.sec-index {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--amber-400);
+  letter-spacing: 0.16em;
+}
+
+.sec-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  color: var(--gray-500);
+}
+
+.sec-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.3), rgba(251, 191, 36, 0));
+  transform-origin: left center;
+  transform: scaleX(0.12);
+  opacity: 0.5;
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s ease;
+}
+
+.is-visible .sec-rule {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* número fantasma gigante: composición editorial de fondo por sección */
+.ghost-num {
+  position: absolute;
+  top: clamp(2rem, 8vh, 6rem);
+  right: 0;
+  font-family: var(--font-display);
+  font-size: clamp(10rem, 24vw, 21rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.75;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(196, 181, 253, 0.14);
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sec-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.8vw, 3.9rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  margin: 0;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+.sec-accent {
+  color: var(--amber-200);
+}
+
+/* ============ Layout ============ */
+.wrap {
+  width: min(1120px, 100% - var(--s-5) * 2);
+  margin-inline: auto;
+}
+
+.wrap-wide {
+  width: min(1280px, 100% - var(--s-5) * 2);
+  margin-inline: auto;
+}
+
+section {
+  position: relative;
+}
+
+/* ============ Botones ============ */
+.btn {
+  --btn-bg: var(--black-700);
+  --btn-fg: var(--gray-050);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 48px;
+  padding: 0 var(--s-4);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    transform 0.15s ease;
+  user-select: none;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: var(--glow-sm);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible,
+a:focus-visible,
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--amber-400);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--amber-400), var(--amber-500));
+  border-color: transparent;
+  color: var(--black-950);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    var(--glow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--amber-300), var(--amber-400));
+  box-shadow: var(--glow-md);
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.btn-sm {
+  min-height: 38px;
+  padding: 0 var(--s-3);
+  font-size: 0.85rem;
+}
+
+/* ============ Formularios ============ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gray-400);
+}
+
+input,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--s-3);
+  background: var(--black-850);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder {
+  color: var(--gray-600);
+}
+
+input:focus {
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: var(--glow-sm);
+  outline: none;
+}
+
+/* ============ Datos on-chain ============ */
+.hash {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--gray-200);
+  word-break: break-all;
+  background: var(--black-850);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--s-2) var(--s-3);
+}
+
+.kv {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kv dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gray-500);
+}
+
+.kv dd {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--white);
+  word-break: break-all;
+}
+
+/* ============ Utilidades de animación ============ */
+/* curva maestra: desaceleración larga, sin rebote (sensación premium) */
+.ease-out-soft {
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reveal {
+  animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Reveal-on-scroll (acción use:reveal) */
+.reveal-target {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-target.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variantes direccionales de reveal (clase .rv-* añadida por use:reveal) */
+.reveal-target.rv-left {
+  transform: translateX(-42px);
+}
+
+.reveal-target.rv-left.is-visible,
+.reveal-target.rv-right.is-visible {
+  transform: translateX(0);
+}
+
+.reveal-target.rv-right {
+  transform: translateX(42px);
+}
+
+.reveal-target.rv-down {
+  transform: translateY(-24px);
+}
+
+.reveal-target.rv-down.is-visible {
+  transform: translateY(0);
+}
+
+.reveal-target.rv-blur {
+  transform: translateY(14px);
+  filter: blur(10px);
+}
+
+.reveal-target.rv-blur.is-visible {
+  filter: blur(0);
+}
+
+.reveal-target.rv-scale {
+  transform: translateY(14px) scale(0.94);
+}
+
+.reveal-target.rv-scale.is-visible {
+  transform: translateY(0) scale(1);
+}
+
+/* Reveal con máscara editorial: el contenido sube recortado por su caja.
+   (usar en un nodo con el texto directamente dentro) */
+.reveal-mask {
+  overflow: hidden;
+}
+
+.reveal-mask > * {
+  transform: translateY(110%);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.reveal-mask.is-visible > * {
+  transform: translateY(0);
+}
+
+/* Palabras de titular con máscara individual: <span class="word-mask">
+   envuelve cada palabra; .is-visible las sube en cascada (--wd = delay). */
+.word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.word-mask > span {
+  display: inline-block;
+  transform: translateY(115%) rotate(2.5deg);
+  transition:
+    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.9s ease;
+  opacity: 0;
+  will-change: transform;
+}
+
+.word-mask.is-visible > span,
+.is-visible .word-mask > span {
+  transform: translateY(0) rotate(0);
+  opacity: 1;
+}
+
+/* Los desplazamientos de reveal conviven con el parallax de scrollfx:
+   .rv-parallax recibe la transformación de scroll en una variable y solo
+   aplica el translate de reveal si NO hay variable de parallax activa. */
+.rv-parallax {
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 2, 2), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+}
+
+.rv-parallax.is-visible {
+  opacity: 1;
+}
+
+.fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+.reveal-1 { animation-delay: 0.08s; }
+.reveal-2 { animation-delay: 0.16s; }
+.reveal-3 { animation-delay: 0.24s; }
+.reveal-4 { animation-delay: 0.32s; }
+
+/* ============ Selección ============ */
+::selection {
+  background: rgba(139, 92, 246, 0.45);
+  color: var(--white);
+}
+
+/* ============ Scrollbar nativa: OCULTA (la reemplaza Scrollbar.svelte) ============ */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ============ Reduced motion ============ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal-target,
+  .reveal-mask > *,
+  .word-mask > span {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  .sec-rule {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ============ Responsive global ============ */
+@media (max-width: 640px) {
+  :root {
+    --s-8: 64px;
+    --s-9: 80px;
+  }
+}
