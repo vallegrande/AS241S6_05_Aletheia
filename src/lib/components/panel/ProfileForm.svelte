@@ -14,6 +14,19 @@
   const user = $derived($auth.user)
   const initial = $derived((user?.displayName ?? user?.email ?? 'A').trim().charAt(0).toUpperCase())
 
+  /** Nombre legible a partir del email si Google no envía displayName. */
+  function nameFromEmail(email) {
+    if (!email) return ''
+    const local = email.split('@')[0]
+    return local
+      .split(/[._-]+/)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+  }
+
+  const googleName = $derived(user?.displayName || nameFromEmail(user?.email))
+
   let loading = $state(true)
   let saving = $state(false)
   let saved = $state(false)
@@ -30,14 +43,27 @@
   onMount(async () => {
     try {
       const p = await getProfile()
-      // Prefill con Google solo si el perfil aún está vacío.
-      nombre = p.nombre || user?.displayName || ''
+      const prefilledNombre = p.nombre || googleName || ''
+      const prefilledFoto = p.foto || user?.photoURL || ''
+      nombre = prefilledNombre
       titulo = p.titulo || ''
       bio = p.bio || ''
-      foto = p.foto || user?.photoURL || ''
+      foto = prefilledFoto
       linkGithub = p.links?.github || ''
       linkLinkedin = p.links?.linkedin || ''
       linkPortafolio = p.links?.portafolio || ''
+
+      // Primera visita sin datos guardados: persiste el prellenado de
+      // Google en segundo plano para que el perfil nunca quede vacío.
+      if (!p.nombre && prefilledNombre) {
+        saveProfile({
+          nombre: prefilledNombre,
+          titulo: '',
+          bio: '',
+          foto: prefilledFoto,
+          links: {},
+        }).catch(() => {})
+      }
     } catch (e) {
       error = e.message || 'No se pudo cargar el perfil'
     } finally {
@@ -105,8 +131,8 @@
 
     <form class="id-form" onsubmit={onSubmit}>
       <div class="id-grid">
-        <FormField label="Nombre completo" for="pf-nombre" help="Viene de tu cuenta de Google; puedes editarlo.">
-          <input id="pf-nombre" name="nombre" bind:value={nombre} required placeholder="Tu nombre" autocomplete="name" />
+        <FormField label="Nombre completo" for="pf-nombre" help="Importado de tu cuenta de Google; edítalo cuando quieras.">
+          <input id="pf-nombre" name="nombre" bind:value={nombre} required placeholder={googleName || 'Tu nombre'} autocomplete="name" />
         </FormField>
         <FormField label="Título profesional" for="pf-titulo">
           <input id="pf-titulo" name="titulo" bind:value={titulo} placeholder="Ej. Desarrollador full-stack" />
