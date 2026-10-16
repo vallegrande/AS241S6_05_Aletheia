@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="index" />
+    <title>Política de privacidad — Aletheia</title>
+    <style>
+      :root {
+        --black-950: #050308;
+        --black-900: #0b0b10;
+        --black-800: #14141b;
+        --white: #ffffff;
+        --gray-200: #c9c5d6;
+        --gray-400: #9c96b0;
+        --gray-500: #726c86;
+        --purple-300: #c4b5fd;
+        --amber-200: #ffd977;
+        --line: rgba(255, 255, 255, 0.08);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--black-950);
+        color: var(--gray-200);
+        font-family: 'Geist Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        position: relative;
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+
+      .page::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(60% 40% at 50% -10%, rgba(139, 92, 246, 0.12), transparent 60%);
+      }
+
+      .topline {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(196, 181, 253, 0.35), transparent);
+      }
+
+      main {
+        position: relative;
+        width: min(720px, 100% - 48px);
+        margin-inline: auto;
+        padding: 72px 0 96px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 56px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.035);
+        color: var(--purple-300);
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+
+      .brand-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--white);
+        line-height: 1.1;
+      }
+
+      .brand-sub {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.72rem;
+        color: var(--gray-500);
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px;
+        font-size: 0.68rem;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--gray-400);
+      }
+
+      .eyebrow::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--amber-200);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(1.8rem, 4.5vw, 2.4rem);
+        font-weight: 700;
+        letter-spacing: -0.028em;
+        line-height: 1.12;
+        color: var(--white);
+      }
+
+      .updated {
+        margin: 0 0 40px;
+        font-size: 0.82rem;
+        color: var(--gray-500);
+      }
+
+      h2 {
+        margin: 44px 0 12px;
+        padding-top: 28px;
+        border-top: 1px solid var(--line);
+        font-size: 1.06rem;
+        font-weight: 650;
+        letter-spacing: -0.015em;
+        color: var(--white);
+      }
+
+      h2:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+      }
+
+      p {
+        margin: 0 0 14px;
+      }
+
+      ul {
+        margin: 0 0 14px;
+        padding-left: 22px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      strong {
+        color: var(--white);
+        font-weight: 600;
+      }
+
+      a {
+        color: var(--amber-200);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .foot {
+        margin-top: 56px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        font-size: 0.78rem;
+        color: var(--gray-500);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <span class="topline" aria-hidden="true"></span>
+      <main>
+        <header class="brand">
+          <span class="brand-mark" aria-hidden="true">Æ</span>
+          <div>
+            <span class="brand-name">Aletheia</span>
+            <span class="brand-sub">Identidad profesional verificable</span>
+          </div>
+        </header>
+
+        <p class="eyebrow">Documento legal</p>
+        <h1>Política de privacidad</h1>
+        <p class="updated">Última actualización: 15 de octubre de 2026</p>
+
+        <h2>1. Qué es Aletheia</h2>
+        <p>
+          Aletheia es una plataforma de identidad profesional verificable. Permite construir un perfil
+          con evidencias (proyectos, certificaciones, logros), generar una huella criptográfica
+          SHA-256 de cada evidencia y, opcionalmente, registrarla en la red Polygon Amoy. Cualquier
+          persona puede verificar una huella sin necesidad de crear una cuenta.
+        </p>
+
+        <h2>2. Qué datos tratamos</h2>
+        <ul>
+          <li>
+            <strong>Cuenta de acceso</strong>: al iniciar sesión con Google recibimos tu identificador
+            de usuario, nombre, correo electrónico y foto de perfil públicos de Google.
+          </li>
+          <li>
+            <strong>Perfil</strong>: nombre, título profesional, biografía, enlaces (GitHub, LinkedIn,
+            portafolio) y la foto de perfil que subas.
+          </li>
+          <li>
+            <strong>Evidencias</strong>: título, tipo, descripción, enlace, fechas y el archivo
+            opcional que adjuntes (máximo 10 MB).
+          </li>
+          <li>
+            <strong>Conexiones externas</strong> (opcionales): si conectas GitHub, guardamos tu nombre
+            de usuario y un token de acceso para listar tus repositorios; si conectas LinkedIn,
+            guardamos tu nombre y foto de perfil de LinkedIn para verificar tu identidad.
+          </li>
+          <li>
+            <strong>Registro on-chain</strong> (opcional): si certificas una evidencia, la dirección de
+            tu wallet interactúa con el contrato inteligente ProofRegistry en Polygon Amoy.
+          </li>
+        </ul>
+
+        <h2>3. Para qué usamos los datos</h2>
+        <ul>
+          <li>Identificar tu sesión y darte acceso a tu panel.</li>
+          <li>Construir y mostrar tu identidad profesional verificable.</li>
+          <li>Calcular la huella SHA-256 de tus evidencias y su estado de certificación.</li>
+          <li>Permitir que terceros verifiquen una huella sin ver tu contenido.</li>
+        </ul>
+
+        <h2>4. Qué se publica en la blockchain</h2>
+        <p>
+          Únicamente la <strong>huella SHA-256</strong> de la evidencia (32 bytes). Nunca se publica
+          el contenido, los archivos ni tus datos personales. La blockchain es pública e inmutable:
+          una huella registrada no se puede borrar. Una huella certifica la integridad del registro,
+          no la veracidad del contenido original.
+        </p>
+
+        <h2>5. Dónde se almacenan los datos</h2>
+        <p>
+          Tu perfil, evidencias y archivos se almacenan en la base de datos PostgreSQL del propio
+          servicio Aletheia, fuera de la cadena. Las credenciales de acceso (Google) se gestionan a
+          través de Firebase Authentication.
+        </p>
+
+        <h2>6. Con quién se comparten</h2>
+        <ul>
+          <li><strong>Google / Firebase</strong>: autenticación de la sesión.</li>
+          <li><strong>GitHub</strong> y <strong>LinkedIn</strong>: solo si tú decides conectarlos.</li>
+          <li><strong>Polygon Amoy</strong>: red pública donde se registra la huella si certificas.</li>
+        </ul>
+        <p>No vendemos ni cedemos tus datos a terceros con fines publicitarios.</p>
+
+        <h2>7. Conservación y eliminación</h2>
+        <p>
+          Conservamos tus datos mientras mantengas tu cuenta. Puedes desconectar GitHub y LinkedIn
+          desde tu perfil en cualquier momento, y solicitar la eliminación completa de tu cuenta y
+          sus datos a través del repositorio del proyecto. Las huellas ya registradas en la
+          blockchain no pueden eliminarse por su naturaleza inmutable.
+        </p>
+
+        <h2>8. Tus derechos</h2>
+        <p>
+          Puedes acceder, rectificar o eliminar tus datos desde tu panel o solicitándolo por los
+          canales de contacto del proyecto.
+        </p>
+
+        <h2>9. Contacto</h2>
+        <p>
+          Para cualquier consulta sobre esta política o tus datos, abre una incidencia en
+          <a href="https://github.com/vallegrande/AS241S6_05_Aletheia/issues" rel="noopener">
+            github.com/vallegrande/AS241S6_05_Aletheia
+          </a>.
+        </p>
+
+        <p class="foot">
+          Aletheia — proyecto académico de identidad profesional descentralizada. Valle Grande,
+          Cañete, Lima, Perú.
+        </p>
+      </main>
+    </div>
+  </body>
+</html>

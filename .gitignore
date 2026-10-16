@@ -19,6 +19,7 @@ dist-ssr
 # Credenciales Firebase (nunca al repositorio)
 .env
 .env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*

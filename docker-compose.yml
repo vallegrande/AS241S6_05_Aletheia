@@ -25,6 +25,9 @@ services:
     environment:
       DATABASE_URL: postgres://aletheia:aletheia@db:5432/aletheia
       FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI:-}
       PORT: "3001"
     depends_on:
       db:
