@@ -519,11 +519,6 @@
     width: 28px;
     height: auto;
     filter: none;
-    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .brand:hover .brand-logo {
-    transform: scale(1.1) rotate(-4deg);
   }
 
   .brand-name {
@@ -646,7 +641,6 @@
   .google-btn:hover {
     border-color: rgba(196, 181, 253, 0.65);
     background: linear-gradient(180deg, rgba(64, 50, 116, 0.9), rgba(48, 36, 92, 0.95));
-    transform: translateY(-1px);
   }
 
   .google-btn:focus-visible {

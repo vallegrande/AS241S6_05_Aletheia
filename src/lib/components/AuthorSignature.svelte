@@ -380,7 +380,6 @@
 
   .portrait-figure:hover .portrait-clip img {
     filter: grayscale(0) contrast(1.08);
-    transform: scale(1.08);
   }
 
   .portrait-caption {

@@ -125,7 +125,6 @@
 
   .google-btn:hover:not(:disabled) {
     border-color: rgba(196, 181, 253, 0.7);
-    transform: translateY(-1px);
   }
 
   .gate-loading {

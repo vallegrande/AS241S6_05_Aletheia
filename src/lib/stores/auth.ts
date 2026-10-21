@@ -18,13 +18,19 @@
 import { writable, get } from 'svelte/store'
 import { initializeApp } from 'firebase/app'
 import {
+  GithubAuthProvider,
   GoogleAuthProvider,
   browserLocalPersistence,
   getAuth,
+  getAdditionalUserInfo,
+  linkWithCredential,
+  linkWithPopup,
   onAuthStateChanged,
+  reauthenticateWithPopup,
   setPersistence,
   signInWithPopup,
   signOut,
+  unlink,
 } from 'firebase/auth'
 import { pushToast } from './toast'
 
@@ -239,6 +245,158 @@ function cleanupPopupMonitor() {
   authPopup = null
 }
 
+/* ------------------------------------------------------------------ */
+/* GitHub (vinculado DESPUÉS del login con Google; nunca como login)   */
+/* ------------------------------------------------------------------ */
+
+export type GithubLink = { username: string; accessToken: string | null }
+
+/**
+ * Vincula la cuenta de GitHub a la sesión actual de Google (linkWithPopup,
+ * NO signInWithPopup — así no hay conflicto de cuentas) y devuelve su
+ * usuario + token de acceso para traer repositorios.
+ */
+export async function linkGithubAccount(): Promise<GithubLink> {
+  if (!firebaseAuth?.currentUser) {
+    throw Object.assign(new Error('Inicia sesión con Google para conectar GitHub.'), {
+      code: AUTH_ERRORS.NOT_CONFIGURED,
+    })
+  }
+  const provider = new GithubAuthProvider()
+  const ghToken = (c: unknown): string | null => {
+    const t = (c as { credential?: { accessToken?: string } | null } | null)?.credential?.accessToken
+    return t ?? null
+  }
+  /** Usuario de GitHub: del AdditionalUserInfo o, si falta, de la API. */
+  const finish = async (cred: Parameters<typeof getAdditionalUserInfo>[0]): Promise<GithubLink> => {
+    const info = getAdditionalUserInfo(cred)
+    const accessToken = ghToken(cred)
+    let username = info?.username ?? ''
+    if (!username && accessToken) {
+      try {
+        const r = await fetch('https://api.github.com/user', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        })
+        if (r.ok) username = String((await r.json())?.login ?? '')
+      } catch {
+        /* sin usuario: el campo queda libre para escribirlo a mano */
+      }
+    }
+    return { username, accessToken }
+  }
+  try {
+    const cred = await linkWithPopup(firebaseAuth.currentUser, provider)
+    return await finish(cred)
+  } catch (err: any) {
+    const code = String(err?.code ?? '')
+    if (code === 'auth/provider-already-linked') {
+      // Ya vinculado a ESTA cuenta: reautenticamos (misma sesión, renueva el
+      // token de GitHub). Nunca signInWithPopup: podría cambiar la sesión.
+      try {
+        const cred = await reauthenticateWithPopup(firebaseAuth.currentUser!, provider)
+        return await finish(cred)
+      } catch (e2: any) {
+        const c2 = String(e2?.code ?? '')
+        if (c2.includes('popup-closed') || c2.includes('cancelled-popup')) {
+          throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_CLOSED)), {
+            code: AUTH_ERRORS.POPUP_CLOSED,
+          })
+        }
+        if (c2 === 'auth/popup-blocked') {
+          throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_BLOCKED)), {
+            code: AUTH_ERRORS.POPUP_BLOCKED,
+          })
+        }
+        throw Object.assign(new Error(githubErrorText(mapAuthError(e2))), { code: mapAuthError(e2) })
+      }
+    }
+    if (code === 'auth/credential-already-in-use') {
+      /**
+       * El GitHub quedó vinculado a otra cuenta de Aletheia (p. ej. una cuenta
+       * de prueba creada antes). Solo quien controla ese GitHub puede repararlo:
+       *   1) entra con GitHub (demuestra que la controla),
+       *   2) se desvincula de esa cuenta vieja,
+       *   3) vuelve a su sesión de Google original (login_hint) y verifica el uid,
+       *   4) vincula el mismo credential a la cuenta actual.
+       * Si la restauración falla, se cierra la sesión para no escribir datos en
+       * la cuenta equivocada.
+       */
+      const origUid = firebaseAuth.currentUser!.uid
+      const origEmail = firebaseAuth.currentUser!.email ?? ''
+      let ghCred: Awaited<ReturnType<typeof signInWithPopup>> | null = null
+      try {
+        pushToast(
+          'info',
+          'Moviendo tu conexión de GitHub',
+          'Entra con GitHub y luego vuelve con Google para vincularlo a esta cuenta.',
+        )
+        ghCred = await signInWithPopup(firebaseAuth, provider)
+        const link = await finish(ghCred)
+        await unlink(ghCred.user, 'github.com').catch(() => {})
+        const google = new GoogleAuthProvider()
+        if (origEmail) google.setCustomParameters({ login_hint: origEmail })
+        const back = await signInWithPopup(firebaseAuth, google)
+        if (back.user.uid !== origUid) throw Object.assign(new Error('uid'), { code: 'github/session-changed' })
+        const ghCredential =
+          (ghCred as { credential?: Parameters<typeof linkWithCredential>[1] | null }).credential ?? null
+        if (ghCredential) await linkWithCredential(back.user, ghCredential).catch(() => {})
+        return link
+      } catch (e2: any) {
+        const c2 = String(e2?.code ?? '')
+        // ¿quedamos en la cuenta vieja? cerramos sesión: nada se guarda ahí
+        if (firebaseAuth.currentUser && firebaseAuth.currentUser.uid !== origUid) {
+          await signOutGoogle()
+        }
+        if (c2 === 'github/session-changed') {
+          throw Object.assign(
+            new Error('La sesión cambió de cuenta. Vuelve a iniciar sesión con Google.'),
+            { code: c2 },
+          )
+        }
+        if (c2.includes('popup-closed') || c2.includes('cancelled-popup')) {
+          throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_CLOSED)), {
+            code: AUTH_ERRORS.POPUP_CLOSED,
+          })
+        }
+        if (c2 === 'auth/popup-blocked') {
+          throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_BLOCKED)), {
+            code: AUTH_ERRORS.POPUP_BLOCKED,
+          })
+        }
+        throw Object.assign(
+          new Error('No pudimos mover la conexión de GitHub. Vuelve a iniciar sesión con Google.'),
+          { code: c2 || 'github/move-failed' },
+        )
+      }
+    }
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_CLOSED)), {
+        code: AUTH_ERRORS.POPUP_CLOSED,
+      })
+    }
+    if (code === 'auth/popup-blocked') {
+      throw Object.assign(new Error(githubErrorText(AUTH_ERRORS.POPUP_BLOCKED)), {
+        code: AUTH_ERRORS.POPUP_BLOCKED,
+      })
+    }
+    throw Object.assign(new Error(githubErrorText(mapAuthError(err))), { code: mapAuthError(err) })
+  }
+}
+
+/**
+ * Desvincula GitHub de la cuenta actual (Firebase). El backend se limpia aparte
+ * con `disconnectGithub()` de api/client.
+ */
+export async function unlinkGithubAccount(): Promise<void> {
+  const user = firebaseAuth?.currentUser
+  if (!user) return
+  await unlink(user, 'github.com')
+}
+
 /** Cierra la sesión de Google (la wallet se desconecta aparte). */
 export async function signOutGoogle() {
   if (!firebaseAuth) return
@@ -331,5 +489,23 @@ export function googleErrorText(code: string): string {
       return 'Problema de red al contactar a Google. Revisa tu conexión.'
     default:
       return 'No se pudo iniciar sesión con Google. Inténtalo de nuevo.'
+  }
+}
+
+/** Mensajes equivalentes para el login con GitHub. */
+export function githubErrorText(code: string): string {
+  switch (code) {
+    case AUTH_ERRORS.NOT_CONFIGURED:
+      return 'Firebase no está configurado: falta el archivo .env con las credenciales.'
+    case AUTH_ERRORS.POPUP_CLOSED:
+      return 'Cerraste la ventana de GitHub antes de terminar.'
+    case AUTH_ERRORS.POPUP_BLOCKED:
+      return 'El navegador bloqueó la ventana de GitHub. Permite popups e inténtalo de nuevo.'
+    case AUTH_ERRORS.UNAUTHORIZED_DOMAIN:
+      return 'Este dominio no está autorizado en Firebase (Authentication → Settings → Authorized domains).'
+    case AUTH_ERRORS.NETWORK:
+      return 'Problema de red al contactar con GitHub. Revisa tu conexión.'
+    default:
+      return 'No se pudo iniciar sesión con GitHub. Inténtalo de nuevo.'
   }
 }

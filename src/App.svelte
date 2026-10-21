@@ -29,19 +29,30 @@
   import ScrollScene from './lib/components/ScrollScene.svelte'
   import Panel from './lib/components/Panel.svelte'
   import VerifyPage from './lib/components/VerifyPage.svelte'
+  import OnboardingModal from './lib/components/OnboardingModal.svelte'
+  import { getProfile } from './lib/api/client'
+  import { OPEN_ONBOARDING } from './lib/stores/panelBus'
   import { initSceneStack } from './lib/scroll/stack'
   import { initCovers } from './lib/scroll/cover'
   import { initAuth, auth } from './lib/stores/auth'
   import { initWallet } from './lib/stores/wallet'
+  import { handleLinkedinCallback } from './lib/linkedin'
 
   let route = $state(location.hash)
   let stackEl = $state(null)
   // Ruta de app (vive en #/panel) vs landing cinematográfica. Solo conmuta
   // qué se renderiza; el diseño de la landing queda intacto.
   let isPanel = $derived(route === '#/panel')
-  let isVerify = $derived(route === '#/verificar')
+  let isVerify = $derived(route.startsWith('#/verificar'))
+  // Asistente de identidad a pantalla completa, con ruta propia:
+  // recargar en #/configurar retoma el paso donde quedó.
+  let isOnboard = $derived(route === '#/configurar')
 
   onMount(() => {
+    // Popup de LinkedIn: si volvimos con ?li=ok, avisamos al opener y cerramos
+    // esta ventana sin montar nada más.
+    if (handleLinkedinCallback()) return
+
     // Firebase: restaura la sesión de Google previa si existe.
     initAuth().catch((err) => console.error('[aletheia] initAuth:', err))
     // Detección silenciosa de Pali Wallet (sin popup).
@@ -69,15 +80,21 @@
       )
     }
     window.addEventListener('hashchange', onHash)
+    const openOnboarding = () => {
+      sessionStorage.removeItem(ONBOARD_KEY)
+      location.hash = '#/configurar'
+    }
+    window.addEventListener(OPEN_ONBOARDING, openOnboarding)
     return () => {
       window.removeEventListener('hashchange', onHash)
+      window.removeEventListener(OPEN_ONBOARDING, openOnboarding)
     }
   })
 
   // Stack de escenas solo en landing: al entrar a #/panel se desmonta
   // (teardown) y al volver se re-inicializa.
   $effect(() => {
-    if (isPanel || isVerify || !stackEl) return
+    if (isPanel || isVerify || isOnboard || !stackEl) return
     const teardown = initSceneStack(stackEl)
     // Física de muelle para TODAS las láminas entrantes (hero→01, 01→02, …).
     const teardownCover = initCovers()
@@ -101,6 +118,34 @@
      para el mismo usuario (refresh de token); uid es estable. */
   let authSettled = false
   let prevUid = null
+
+  const ONBOARD_KEY = 'aletheia:onboarding-dismissed'
+
+  /** Perfil incompleto: falta lo esencial para mostrarse al mundo. */
+  function needsOnboarding(p) {
+    return !p || !p.nombre || !p.titulo || !p.bio
+  }
+
+  /**
+   * Abre el asistente si el perfil está incompleto.
+   * Si la API falla (token a medias, red), MEJOR guiar que dejarlo perdido.
+   */
+  function maybeOnboard() {
+    return getProfile()
+      .then((p) => {
+        if (needsOnboarding(p)) {
+          location.hash = '#/configurar'
+          return true
+        }
+        // perfil completo y colgado en #/configurar → al panel
+        if (location.hash === '#/configurar') location.hash = '#/panel'
+        return false
+      })
+      .catch(() => {
+        location.hash = '#/configurar'
+        return true
+      })
+  }
 
   function kickToLanding() {
     // reemplaza el entry del historial: atrás NO reabre el panel.
@@ -126,11 +171,13 @@
       prevUid = uid
       // SIN SESIÓN NO HAY PANEL: si restauró (o entró) sobre #/panel a oscuras,
       // expulsa — el visitante legítimo (con sesión) no se mueve.
-      if (!uid && location.hash === '#/panel') kickToLanding()
+      if (!uid && (location.hash === '#/panel' || location.hash === '#/configurar')) kickToLanding()
+      // Sesión restaurada con perfil incompleto → asistente paso a paso.
+      if (uid) maybeOnboard()
       return
     }
-    /* GUARDIA PERMANENTE: sin sesión no hay panel (cubre atrás/popstate) */
-    if (!uid && location.hash === '#/panel') {
+    /* GUARDIA PERMANENTE: sin sesión no hay panel ni asistente (atrás/popstate) */
+    if (!uid && (location.hash === '#/panel' || location.hash === '#/configurar')) {
       kickToLanding()
       prevUid = null
       return
@@ -140,19 +187,24 @@
     prevUid = uid
     if (wasSignedIn && !uid) {
       // cerró sesión: fuera del panel, a la landing (entry reemplazado)
+      // y se olvida la omisión del asistente (el próximo login lo reofrece).
+      sessionStorage.removeItem(ONBOARD_KEY)
       kickToLanding()
     } else if (!wasSignedIn && uid) {
-      // inició sesión: al panel
-      location.hash = '#/panel'
+      // inició sesión: si el perfil está incompleto, guía paso a paso en
+      // modal; si ya está completo, va directo al panel.
+      maybeOnboard().then((opened) => {
+        if (!opened) location.hash = '#/panel'
+      })
     }
   })
 </script>
 
 <GlobalBackground />
-{#if !isPanel && !isVerify}
+{#if !isPanel && !isVerify && !isOnboard}
   <NavExpand />
 {/if}
-{#if !isPanel && !isVerify}
+{#if !isPanel && !isVerify && !isOnboard}
   <Scrollbar />
 {/if}
 
@@ -160,6 +212,8 @@
   <Panel />
 {:else if isVerify}
   <VerifyPage />
+{:else if isOnboard}
+  <!-- pantalla de asistente a pantalla completa; el fondo de la landing queda debajo -->
 {:else}
   <main bind:this={stackEl}>
   <!-- 00 · Aparición: el único escenario sin suelo propio (muestra el mesh) -->
@@ -200,3 +254,17 @@
 {/if}
 
 <ToastStack />
+{#if isOnboard}
+  <OnboardingModal
+    onClose={() => {
+      sessionStorage.setItem(ONBOARD_KEY, '1')
+      sessionStorage.removeItem('aletheia:onboarding-progress')
+      location.hash = '#/panel'
+    }}
+    onFinish={() => {
+      sessionStorage.setItem(ONBOARD_KEY, '1')
+      sessionStorage.removeItem('aletheia:onboarding-progress')
+      location.hash = '#/panel'
+    }}
+  />
+{/if}

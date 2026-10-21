@@ -12,6 +12,7 @@
     evidenceFileUrl,
   } from '../../api/client'
   import { pushToast } from '../../stores/toast'
+  import { OPEN_EVIDENCE_FORM } from '../../stores/panelBus'
   import FormField from '../dapp/FormField.svelte'
   import StatusMessage from '../dapp/StatusMessage.svelte'
   import Icon from '../Icon.svelte'
@@ -52,7 +53,12 @@
     }
   }
 
-  onMount(refresh)
+  onMount(() => {
+    refresh()
+    const openForm = () => openNew()
+    window.addEventListener(OPEN_EVIDENCE_FORM, openForm)
+    return () => window.removeEventListener(OPEN_EVIDENCE_FORM, openForm)
+  })
 
   function resetForm() {
     fTipo = 'proyecto'

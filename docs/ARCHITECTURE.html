@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Documentación — DApp Aletheia</title>
+</head>
+<body style="font-family:'Montserrat',sans-serif;font-size:11pt;color:#000000;">
+
+  <!-- Para llevar a Google Docs: subir este archivo en Google Docs
+       (Archivo → Abrir documento → Subir) o copiar/pegar este contenido.
+       Todo el texto usa Montserrat 11 pt. -->
+  <p style="font-family:'Montserrat',sans-serif;font-size:11pt;color:#888888;">
+    Importar en Google Docs: Docs → Archivo → Abrir → Subir este .html (o copiar y pegar).
+    Fuente: Montserrat, 11&nbsp;pt en todo el documento.
+  </p>
+
+  <h1 style="font-family:'Montserrat',sans-serif;font-size:11pt;font-weight:bold;margin:18pt 0 6pt 0;">Documentación — DApp Aletheia</h1>
+
+  <h2 style="font-family:'Montserrat',sans-serif;font-size:11pt;font-weight:bold;margin:14pt 0 4pt 0;">1) Transacciones enfocadas a la propuesta que se está trabajando ✅</h2>
+
+  <p style="font-family:'Montserrat',sans-serif;font-size:11pt;margin:4pt 0;">
+    <b>Propuesta actual: certificados válidos</b> — evidencias profesionales verificables (títulos, certificaciones, logros, portafolio).
+  </p>
+
+  <table border="1" cellspacing="0" cellpadding="6" style="font-family:'Montserrat',sans-serif;font-size:11pt;border-collapse:collapse;border:1pt solid #666666;">
+    <tr>
+      <td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;"><b>Elemento</b></td>
+      <td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;"><b>Detalle</b></td>
+    </tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Contrato</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">ProofRegistry</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Red</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Polygon Amoy (chainId 80002)</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Transacción</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">register(bytes32 hash) — firmada por el usuario con la wallet Pali</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Dato registrado</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Huella SHA-256 de la evidencia (nunca datos personales ni archivos)</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Estado de la evidencia</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">pending → hashed → onchain, con tx_hash y fecha de certificación</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Verificación</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Pública en #/verificar?hash=…, sin cuenta y desde el QR del certificado</td></tr>
+  </table>
+
+  <p style="font-family:'Montserrat',sans-serif;font-size:11pt;margin:6pt 0;">
+    El mismo patrón (huella off-chain + prueba on-chain) es el que permitiría extender la DApp a las demás propuestas del enunciado: <b>remesas, agricultura, donaciones, voto digital, créditos, tiendas online</b>, etc.
+  </p>
+
+  <h2 style="font-family:'Montserrat',sans-serif;font-size:11pt;font-weight:bold;margin:14pt 0 4pt 0;">2) Historial de transacciones (BD propia) con filtrado por red conectada ✅</h2>
+
+  <p style="font-family:'Montserrat',sans-serif;font-size:11pt;margin:4pt 0;">
+    Se eligió <b>almacenamiento en BD</b> (frente a usar la API de un explorador de bloques): histórico completo propio, sin límites externos y filtrable por usuario.
+  </p>
+
+  <table border="1" cellspacing="0" cellpadding="6" style="font-family:'Montserrat',sans-serif;font-size:11pt;border-collapse:collapse;border:1pt solid #666666;">
+    <tr>
+      <td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;"><b>Aspecto</b></td>
+      <td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;"><b>Detalle</b></td>
+    </tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Tabla</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">transacciones (uid, evidencia_id, tx_hash, chain_id, created_at)</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Reglas</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Una fila por transacción (re-certificaciones incluidas); UNIQUE (evidencia_id, tx_hash) evita duplicados</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">API</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">GET /api/transactions — historial del usuario, ordenado por fecha descendente</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Filtro por red conectada</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">El endpoint acepta ?chain_id=&lt;red actual&gt;; ej.: ZkSYS/Syscoin 57000·901, Sepolia 11155111, Hoodi 560048, Polygon Amoy 80002</td></tr>
+    <tr><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">UI (panel → Historial)</td><td style="font-family:'Montserrat',sans-serif;font-size:11pt;border:1pt solid #666666;">Fecha, evidencia implicada, red, hash de tx copiable y enlace directo al explorador oficial de cada red</td></tr>
+  </table>
+
+  <p style="font-family:'Montserrat',sans-serif;font-size:11pt;margin:6pt 0;">
+    Los exploradores por red están mapeados en src/lib/web3/chains.ts (Ethereum/Sepolia/Hoodi, Syscoin/ZkSYS, Polygon, BNB, Arbitrum, Optimism, Base, Avalanche), de modo que “ver transacción” siempre abre el explorador correcto para la red en que ocurrió la transacción.
+  </p>
+
+<!-- © Sin copyright — generado para el proyecto Aletheia -->
+</body>
+</html>

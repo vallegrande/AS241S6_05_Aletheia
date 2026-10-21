@@ -3,7 +3,7 @@
    * Panel — dashboard de identidad de Aletheia (vive en #/panel).
    *
    * Layout: header fijo + rail colapsable 260px + main.
-   * Módulos: Resumen, Evidencias y Certificados (API Express + Postgres).
+   * Módulos: Resumen, Evidencias, Certificados e Historial (API Express + Postgres).
    * El perfil se edita en un modal abierto desde el menú de cuenta.
    * La wallet (Pali) solo se necesita para certificar on-chain en Amoy.
    */
@@ -21,7 +21,8 @@
   import ProfileForm from './panel/ProfileForm.svelte'
   import EvidencesSection from './panel/EvidencesSection.svelte'
   import CertificatesSection from './panel/CertificatesSection.svelte'
-  import OverviewSection from './panel/OverviewSection.svelte'
+  import TransactionsSection from './panel/TransactionsSection.svelte'
+  import DashboardSection from './panel/DashboardSection.svelte'
   import Icon from './Icon.svelte'
   import { OPEN_WALLET_MODAL, OPEN_PROFILE_MODAL } from '../stores/panelBus'
   import { onMount } from 'svelte'
@@ -32,20 +33,21 @@
   const walletOn = $derived($wallet.connected)
 
   const NAV = [
-    { id: 'resumen', label: 'Resumen', icon: 'sparkle' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'sparkle' },
     { id: 'evidencias', label: 'Evidencias', icon: 'book' },
     { id: 'certificados', label: 'Certificados', icon: 'award' },
+    { id: 'historial', label: 'Historial', icon: 'history' },
   ]
 
-  let activeTab = $state('resumen')
+  let activeTab = $state('dashboard')
   let sideOpen = $state(false)
   let netOpen = $state(false)
   let walletOpen = $state(false)
   let profileOpen = $state(false)
 
   const MODULES = {
-    resumen: {
-      title: 'Resumen',
+    dashboard: {
+      title: 'Dashboard',
       sub: 'Tu reputación en un vistazo: evidencias, huellas y certificados.',
       icon: 'sparkle',
     },
@@ -59,8 +61,13 @@
       sub: 'Huella SHA-256 y registro on-chain en Polygon Amoy.',
       icon: 'award',
     },
+    historial: {
+      title: 'Historial',
+      sub: 'Cada transacción on-chain que has firmado, con su red y fecha.',
+      icon: 'history',
+    },
   }
-  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.resumen)
+  const moduleMeta = $derived(MODULES[activeTab] ?? MODULES.dashboard)
 
   const activeIdx = $derived(NAV.findIndex((t) => t.id === activeTab))
   let collapsed = $state(typeof localStorage !== 'undefined' && localStorage.getItem('sb-collapsed') === '1')
@@ -260,9 +267,9 @@
     </header>
 
     <main>
-      <div role="tabpanel" id="panel-resumen" aria-label="Resumen" hidden={activeTab !== 'resumen'}>
+      <div role="tabpanel" id="panel-dashboard" aria-label="Dashboard" hidden={activeTab !== 'dashboard'}>
         <AuthGate>
-          <OverviewSection onNavigate={select} />
+          <DashboardSection />
         </AuthGate>
       </div>
 
@@ -275,6 +282,12 @@
       <div role="tabpanel" id="panel-certificados" aria-label="Certificados" hidden={activeTab !== 'certificados'}>
         <AuthGate>
           <CertificatesSection />
+        </AuthGate>
+      </div>
+
+      <div role="tabpanel" id="panel-historial" aria-label="Historial de transacciones" hidden={activeTab !== 'historial'}>
+        <AuthGate>
+          <TransactionsSection />
         </AuthGate>
       </div>
     </main>

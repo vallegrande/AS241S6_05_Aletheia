@@ -369,7 +369,6 @@
 
 .dash-link:hover .dash-ic {
   color: var(--sb-ink-2);
-  transform: translateY(-1px);
 }
 
 .dash-link.active .dash-ic {

@@ -8,6 +8,7 @@
   import StatusMessage from './dapp/StatusMessage.svelte'
   import FormField from './dapp/FormField.svelte'
   import Icon from './Icon.svelte'
+  import { onMount } from 'svelte'
 
   let hashInput = $state('')
   let loading = $state(false)
@@ -19,6 +20,10 @@
     e.preventDefault()
     const h = hashInput.trim()
     if (!h) return
+    await search(h)
+  }
+
+  async function search(h) {
     loading = true
     error = ''
     result = null
@@ -31,6 +36,17 @@
       loading = false
     }
   }
+
+  // QR / enlace compartido: #/verificar?hash=… verifica al entrar.
+  onMount(() => {
+    const qs = location.hash.split('?')[1]
+    if (!qs) return
+    const h = new URLSearchParams(qs).get('hash')
+    if (h) {
+      hashInput = h
+      search(h)
+    }
+  })
 
   const tipoLabel = (id) =>
     ({ proyecto: 'Proyecto', certificacion: 'Certificación', logro: 'Logro', portafolio: 'Portafolio' })[id] ?? id

@@ -26,8 +26,12 @@ export async function sha256HexOfString(text: string): Promise<string> {
 }
 
 /**
- * Huella de una evidencia: del archivo si existe; si no, de los metadatos
+ * Huella de una evidencia: de los archivos si existen; si no, de los metadatos
  * (tipo|titulo|descripcion|enlace|fecha) para que siempre haya algo que certificar.
+ *
+ * Con un solo archivo se conserva el cálculo antiguo (solo el contenido), así
+ * las huellas ya emitidas siguen siendo válidas. Con varios, la huella cubre
+ * metadatos + nombre y contenido de cada archivo, en orden.
  */
 export async function evidenceFingerprint(ev: {
   tipo: string
@@ -37,8 +41,25 @@ export async function evidenceFingerprint(ev: {
   fecha?: string | null
   has_file?: boolean
   file?: Blob | null
+  files?: File[]
 }): Promise<string> {
-  if (ev.file) return sha256Hex(ev.file)
   const meta = [ev.tipo, ev.titulo, ev.descripcion ?? '', ev.enlace ?? '', ev.fecha ?? ''].join('|')
-  return sha256HexOfString(meta)
+  const files: Array<Blob & { name?: string }> = (ev.files ?? (ev.file ? [ev.file] : [])).filter(Boolean)
+  if (files.length === 1) return sha256Hex(files[0])
+  if (files.length === 0) return sha256HexOfString(meta)
+
+  const enc = new TextEncoder()
+  const parts: Uint8Array[] = [enc.encode(meta + '\n')]
+  for (const f of files) {
+    parts.push(enc.encode(`${f.name ?? 'archivo'}\n`))
+    parts.push(new Uint8Array(await f.arrayBuffer()))
+  }
+  const total = parts.reduce((n, p) => n + p.length, 0)
+  const bundle = new Uint8Array(total)
+  let offset = 0
+  for (const p of parts) {
+    bundle.set(p, offset)
+    offset += p.length
+  }
+  return sha256Hex(bundle)
 }

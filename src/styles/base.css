@@ -305,9 +305,8 @@ section {
 }
 
 .btn:hover:not(:disabled) {
-  border-color: rgba(251, 191, 36, 0.4);
-  box-shadow: var(--glow-sm);
-  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .btn:active:not(:disabled) {
@@ -323,7 +322,7 @@ section {
 a:focus-visible,
 input:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--amber-400);
+  outline: 2px solid rgba(255, 255, 255, 0.55);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -339,7 +338,7 @@ button:focus-visible {
 
 .btn-primary:hover:not(:disabled) {
   background: linear-gradient(180deg, var(--amber-300), var(--amber-400));
-  box-shadow: var(--glow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .btn-ghost {
@@ -386,8 +385,8 @@ input::placeholder {
 }
 
 input:focus {
-  border-color: rgba(251, 191, 36, 0.5);
-  box-shadow: var(--glow-sm);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
   outline: none;
 }
 

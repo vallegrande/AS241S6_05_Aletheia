@@ -18,6 +18,8 @@
   import { wallet, connectWallet } from '../../stores/wallet'
   import { pushToast } from '../../stores/toast'
   import StatusMessage from '../dapp/StatusMessage.svelte'
+  import PanelModal from '../PanelModal.svelte'
+  import EvidenceQr from './EvidenceQr.svelte'
   import Icon from '../Icon.svelte'
   import { fly } from 'svelte/transition'
 
@@ -26,6 +28,7 @@
   let error = $state('')
   let busyId = $state(null)
   let busyKind = $state('') // 'hash' | 'onchain'
+  let qrEv = $state(null) // evidencia cuyo QR se muestra en el modal
 
   const contractReady = Boolean(PROOF_REGISTRY_ADDRESS)
 
@@ -157,6 +160,16 @@
             {/if}
           </div>
           <div class="ct-actions">
+            {#if ev.hash}
+              <button
+                type="button"
+                class="btn btn-sm"
+                onclick={() => (qrEv = ev)}
+                title="QR de verificación pública (huella SHA-256)"
+              >
+                <Icon name="qr" size={13} /> QR
+              </button>
+            {/if}
             <button
               type="button"
               class="btn btn-sm"
@@ -186,6 +199,12 @@
         </li>
       {/each}
     </ul>
+  {/if}
+
+  {#if qrEv}
+    <PanelModal title="QR de verificación" width={440} onClose={() => (qrEv = null)}>
+      <EvidenceQr evidence={qrEv} />
+    </PanelModal>
   {/if}
 </section>
 
